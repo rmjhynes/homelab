@@ -1,2 +1,2 @@
-# homelab
+# Homelab 🧪
 My homelab config.
