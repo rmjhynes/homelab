@@ -1,4 +1,3 @@
-
 configs:
   # Creates a secret for each key/value specified below so
   # ArgoCD can authenticate to the repository
