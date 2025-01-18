@@ -14,7 +14,7 @@ spec:
         - values.yaml
   destination:
     namespace: monitoring
-    name: kind
+    name: in-cluster
   syncPolicy:
     automated:
       prune: true

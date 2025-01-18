@@ -10,7 +10,7 @@ spec:
   project: default
   destination:
     namespace: argocd
-    name: kind
+    name: in-cluster
   source:
     chart: argo-cd
     repoURL: https://argoproj.github.io/argo-helm
