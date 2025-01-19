@@ -11,7 +11,7 @@ spec:
   # Allow manifests to deploy from any Git repos
   sourceRepos:
   - '*'
-  # Only permit applications to deploy to the guestbook namespace in the same cluster
+  # Only permit applications to deploy to the below namespaces in the same cluster
   destinations:
   - namespace: argocd
     server: https://kubernetes.default.svc§V
