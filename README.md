@@ -1,6 +1,9 @@
 # Homelab 🧪
 My homelab config.
 
+## Background
+Having no experience managing a production grade Kubernetes platform, setting up a homelab is allowing me to get familiar with popular industry tools and experiment in a safe environment. I am using this as an opportunity to build something different to what I manage professionally so I can build new skills and become a more well-rounded engineer.
+
 ## Hardware
 - Beelink S12 Mini Pro (16 GB RAM, 500GB SSD)
 
