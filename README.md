@@ -14,3 +14,6 @@ For ease of reproducability and decalarative configuration, NixOS is my distro o
 - k3s - A lightweight k8s distribution for container orchestration.
 - ArgoCD - A continuous delivery tool following declarative, GitOps principles.
 - Prometheus / Grafana - For cluster monitoring and visualisation.
+
+## Cluster
+For simplicity whilst I am starting out, the cluster is made up of a single node. I will be looking to use a multi-node architecture when I am more confident.
