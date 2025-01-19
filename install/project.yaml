@@ -17,3 +17,7 @@ spec:
     server: https://kubernetes.default.svc
   - namespace: monitoring
     server: https://kubernetes.default.svc
+  # Allow all cluster-scoped resources to be created
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
