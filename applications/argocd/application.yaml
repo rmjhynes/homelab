@@ -8,15 +8,16 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  destination:
-    namespace: argocd
-    name: in-cluster
   source:
     chart: argo-cd
     repoURL: https://argoproj.github.io/argo-helm
     targetRevision: 7.7.16
     helm:
       releaseName: argo
+  destination:
+    # Resources applied to default k3s cluster
+    name: in-cluster
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).

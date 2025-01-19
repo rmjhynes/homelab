@@ -1,19 +1,20 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: app-of-apps
+  name: applications
   namespace: argocd      
 spec:
   project: default
-  destination:
-    namespace: argocd
-    name: in-cluster
   source:
     repoURL: https://github.com/rmjhynes/homelab.git
     targetRevision: HEAD
     path: applications
     directory:
       recurse: true
+  destination:
+    # Resources applied to default k3s cluster
+    name: in-cluster
+    namespace: argocd
   syncPolicy:
     automated:
       prune: false # Specifies if resources should be pruned during auto-syncing ( false by default ).
