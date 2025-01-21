@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: freshrss
+  labels:
+    app: freshrss
+spec:
+  containers:
+  - name: freshrss
+    image: freshrss/freshrss:latest
+
