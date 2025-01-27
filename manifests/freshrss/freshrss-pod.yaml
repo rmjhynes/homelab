@@ -8,4 +8,9 @@ spec:
   containers:
   - name: freshrss
     image: freshrss/freshrss:latest
-
+    env:
+    - name: FRESHRSS_USER
+      valueFrom:
+        configMapKeyRef:
+          name: freshrss-config
+          key: freshrss-user
