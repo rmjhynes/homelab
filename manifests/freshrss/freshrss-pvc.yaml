@@ -9,3 +9,4 @@ spec:
     requests:
       storage: 1Gi
   storageClassName: local-path
+  volumeName: freshrss-backup-pv
