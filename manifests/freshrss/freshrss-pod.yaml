@@ -8,9 +8,16 @@ spec:
   containers:
   - name: freshrss
     image: freshrss/freshrss:latest
+    volumeMounts:
+    - mountPath: /var/www/FreshRSS/data/users
+      name: backup
     env:
     - name: FRESHRSS_USER
       valueFrom:
         configMapKeyRef:
           name: freshrss-config
           key: freshrss-user
+  volumes:
+  - name: backup
+    persistentVolumeClaim:
+      claimName: freshrss-backup-pvc
