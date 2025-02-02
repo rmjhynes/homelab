@@ -10,7 +10,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain  # Keep data even if PVC is deleted
   storageClassName: local-path
   local:
-    path: /var/lib/rancher/k3s/storage
+    path: /var/lib/rancher/k3s/storage/users
   nodeAffinity:
     required:
       nodeSelectorTerms:
