@@ -10,10 +10,13 @@ Having no experience managing a production grade Kubernetes platform, setting up
 ## OS
 For ease of reproducability and decalarative configuration, NixOS is my distro of choice for my homelab. The actual configuration can be found in my [nixos-config](https://github.com/rmjhynes/nixos-config) repo.
 
+## Cluster
+For simplicity whilst I am starting out, the k3s cluster is made up of a single node. I will be looking to use a multi-node architecture when I am more confident.
+
 ## Infrastructure / Tools
 - k3s - A lightweight k8s distribution for container orchestration.
 - ArgoCD - A continuous delivery tool following declarative, GitOps principles.
 - Prometheus / Grafana - For cluster monitoring and visualisation.
 
-## Cluster
-For simplicity whilst I am starting out, the cluster is made up of a single node. I will be looking to use a multi-node architecture when I am more confident.
+## Applications
+- [freshrss](https://github.com/FreshRSS/FreshRSS) - A self-hosted RSS feed aggregator.
