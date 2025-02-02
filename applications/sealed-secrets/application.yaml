@@ -9,7 +9,7 @@ metadata:
 spec:
   project: homelab
   source:
-    repoURL: https://bitnami-labs.github.io/sealed-secret
+    repoURL: https://bitnami-labs.github.io/sealed-secrets
     chart: sealed-secrets
     targetRevision: "0.28.0"
     helm:
