@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sealed-secrets
+  namespace: argocd
+  # Ensures all resources managed by this application are deleted
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: homelab
+  source:
+    repoURL: hhttps://bitnami-labs.github.io/sealed-secret
+    chart: sealed-secrets
+    targetRevision: "0.28.0"
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    # Resources applied to default k3s cluster
+    name: in-cluster
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
