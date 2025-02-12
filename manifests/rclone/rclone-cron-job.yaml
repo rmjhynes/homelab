@@ -14,7 +14,7 @@ spec:
           containers:
           - name: freshrss-backup
             image: rclone/rclone:latest
-            command: ["/bin/sh", "-c", "rclone sync /tmp drive:homelab/freshrss-data"]
+            command: ["/bin/sh", "-c", "rclone sync /tmp googledrive:homelab/freshrss-data"]
             volumeMounts:
               - name: freshrss-users
                 mountPath: /tmp
