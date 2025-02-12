@@ -4,8 +4,8 @@ metadata:
   name: freshrss-backup-cronjob
   namespace: default
 spec:
-  # Backs up freshrss data once per day
-  schedule: "0 0 * * *"
+  # Backs up freshrss data once per day at 8pm
+  schedule: "0 20 * * *"
   jobTemplate:
     spec:
       template:
@@ -14,21 +14,15 @@ spec:
           containers:
           - name: freshrss-backup
             image: rclone/rclone:latest
-            command: ["/bin/sh", "-c", "rclone sync /tmp google-drive:homelab/freshrss-data --config /home/rclone.conf"]
+            command: ["/bin/sh", "-c", "rclone sync /tmp drive:homelab/freshrss-data"]
             volumeMounts:
               - name: freshrss-users
                 mountPath: /tmp
-              - name : rclone-config
-                mountPath: /home
             envFrom:
             - secretRef:
-                name: rclone-config-secret
+                name: rclone-config
           volumes:
             - name: freshrss-users
               hostPath:
                 path: /var/lib/rancher/k3s/storage/users
-                type: Directory
-            - name: rclone-config
-              hostPath:
-                path: /home/rmjhynes/.config/rclone
                 type: Directory
