@@ -3,9 +3,6 @@ kind: Application
 metadata:
   name: sealed-secrets
   namespace: argocd
-  # Ensures all resources managed by this application are deleted
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: homelab
   source:
