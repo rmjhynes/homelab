@@ -92,6 +92,12 @@ config:
     - search:
         provider: duckduckgo
         target: _blank
+    - datetime:
+      text_size: xl
+      locale: gb
+      format:
+        datestyle: long
+        timeStyle: long
     ## Uncomment to enable Kubernetes integration
     # - kubernetes:
     #     cluster:
