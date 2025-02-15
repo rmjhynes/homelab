@@ -5,13 +5,17 @@ metadata:
   namespace: argocd
 spec:
   project: homelab
-  source:
-    repoURL: https://jameswynn.github.io/helm-charts
-    chart: homepage
-    targetRevision: "2.0.1"
-    helm:
-      valueFiles:
-        - https://github.com/rmjhynes/homelab/blob/main/applications/homepage/values.yaml
+  sources:
+    - repoURL: https://jameswynn.github.io/helm-charts
+      chart: homepage
+      targetRevision: "2.0.1"
+      helm:
+        valueFiles:
+          - $values/applications/homepage/values.yaml
+    - repoURL: https://github.com/rmjhynes/homelab
+      targetRevision: HEAD
+      ref: values
+
   destination:
     # Resources applied to default k3s cluster
     name: in-cluster
