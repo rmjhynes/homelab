@@ -66,12 +66,12 @@ config:
               href: https://github.com/rmjhynes
   services:
     - Calendar:
-      - Calendar:
-        widget:
-          type: calendar
-          firstDayInWeek: monday
-          view: monthly
-          timezone: Europe/London
+        - Calendar:
+            widget:
+              type: calendar
+              firstDayInWeek: monday
+              view: monthly
+              timezone: Europe/London
     
     - My Second Group:
         - My Second Service:
