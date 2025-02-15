@@ -65,11 +65,14 @@ config:
             - abbr: RMJ GitHub
               href: https://github.com/rmjhynes
   services:
-    - My First Group:
-        - My First Service:
-            href: http://localhost/
-            description: Homepage is awesome
-
+    - Calendar:
+      - Calendar:
+        widget:
+          type: calendar
+          firstDayInWeek: monday
+          view: monthly
+          timezone: Europe/London
+    
     - My Second Group:
         - My Second Service:
             href: http://localhost/
