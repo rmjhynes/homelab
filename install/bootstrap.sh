@@ -1,5 +1,9 @@
-# Create namespace
+# Create namespace for argo resources
 kubectl create ns argocd
+
+# Add Argo Helm repo
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
 
 # Install Helm chart
 helm install argocd argo/argo-cd --namespace argocd
