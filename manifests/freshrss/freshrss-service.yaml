@@ -3,11 +3,11 @@ kind: Service
 metadata:
   name: freshrss-service
 spec:
+  type: NodePort
   selector:
     app: freshrss
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
-  type: ClusterIP
-
+      nodePort: 30000
