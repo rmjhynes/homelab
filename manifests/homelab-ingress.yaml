@@ -18,3 +18,14 @@ spec:
             port:
               number: 80
 
+  - host: excalidraw.homelab
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: excalidraw-service
+            port:
+              number: 80
+
