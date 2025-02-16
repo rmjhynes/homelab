@@ -14,6 +14,7 @@ data:
             fallthrough in-addr.arpa ip6.arpa
         }
         rewrite name freshrss.homelab traefik.kube-system.svc.cluster.local
+        rewrite name excalidraw.homelab traefik.kube-system.svc.cluster.local
         forward . 8.8.8.8 1.1.1.1
         cache 30
         loop
