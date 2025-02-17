@@ -79,9 +79,12 @@ config:
             description: Homepage is the best
 
     - My Third Group:
-        - My Third Service:
-            href: http://localhost/
-            description: Homepage is 😎
+        - Excalidraw:
+            href: http://excalidraw.homelab
+            description: Excalidraw
+        - Freshrss:
+            href: http://freshrss.homelab
+            description: RSS Feeds
   widgets:
     - resources:
         # change backend to 'kubernetes' to use Kubernetes integration. Requires RBAC.
