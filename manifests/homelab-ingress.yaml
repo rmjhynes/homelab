@@ -40,3 +40,13 @@ spec:
             port:
               number: 9090
 
+  - host: scratch-map.homelab
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: scratch-map-service
+            port:
+              number: 8080
