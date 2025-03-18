@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: deepseek
+  name: ollama
   labels:
-    app: deepseek
+    app: ollama
 spec:
   containers:
-  - name: deepseek
+  - name: ollama
     image: ollama/ollama:latest
