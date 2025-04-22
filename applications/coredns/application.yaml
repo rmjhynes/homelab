@@ -5,10 +5,17 @@ metadata:
   namespace: argocd
 spec:
   project: homelab
-  source:
-    chart: coredns
-    repoURL: https://coredns.github.io/helm
-    targetRevision: 1.40.0
+  sources:
+    - repoURL: https://coredns.github.io/helm
+      chart: coredns
+      targetRevision: 1.40.0
+      helm:
+        valueFiles:
+          - $values/applications/coredns/values.yaml
+    - repoURL: https://github.com/rmjhynes/homelab
+      targetRevision: HEAD
+      ref: values
+
   destination:
     # Resources applied to default k3s cluster
     name: in-cluster
