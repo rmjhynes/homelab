@@ -13,6 +13,7 @@ data:
             pods insecure
             fallthrough in-addr.arpa ip6.arpa
         }
+        rewrite name home.homelab traefik.kube-system.svc.cluster.local
         rewrite name freshrss.homelab traefik.kube-system.svc.cluster.local
         rewrite name excalidraw.homelab traefik.kube-system.svc.cluster.local
         rewrite name linkding.homelab traefik.kube-system.svc.cluster.local
