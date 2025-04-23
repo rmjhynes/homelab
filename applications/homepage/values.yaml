@@ -85,6 +85,13 @@ config:
         - Freshrss:
             href: http://freshrss.homelab
             description: RSS Feeds
+        - Linkding:
+            href: http://linkding.homelab
+            description: Bookmark Manager
+        - Scratchmap:
+            href: http://scratch-map.homelab
+            description: Bookmark Manager
+
   widgets:
     - resources:
         # change backend to 'kubernetes' to use Kubernetes integration. Requires RBAC.
