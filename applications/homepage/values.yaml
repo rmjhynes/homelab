@@ -39,9 +39,9 @@ ingress:
     # labels:
     #   # This label will enable discover of this deployment in Homepage
     #   gethomepage.dev/enabled: "true"
-    # annotations:
-    #   # These annotations will configure how this deployment is shown in Homepage
-    #   gethomepage.dev/name: "Homepage"
+    annotations:
+      # These annotations will configure how this deployment is shown in Homepage
+      gethomepage.dev/name: "Home"
     #   gethomepage.dev/description: "A modern, secure, highly customizable application dashboard."
     #   gethomepage.dev/group: "A New Group"
     #   gethomepage.dev/icon: "homepage.png"
