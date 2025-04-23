@@ -25,8 +25,9 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: argocd-server
-            namespace: argocd
+            # Points to a proxy service that routes to the
+            # argocd-server service in the argocd namespace
+            name: argocd-server-proxy
             port:
               number: 443
 
