@@ -1,3 +1,4 @@
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -8,14 +9,12 @@ spec:
   sources:
     - repoURL: https://jameswynn.github.io/helm-charts
       chart: homepage
-      targetRevision: "2.0.1"
+      targetRevision: 2.0.1
       helm:
-        valueFiles:
-          - $values/applications/homepage/values.yaml
+        valueFiles: [$values/applications/homepage/values.yaml]
     - repoURL: https://github.com/rmjhynes/homelab
       targetRevision: HEAD
       ref: values
-
   destination:
     # Resources applied to default k3s cluster
     name: in-cluster
@@ -24,5 +23,4 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+    syncOptions: [CreateNamespace=true]

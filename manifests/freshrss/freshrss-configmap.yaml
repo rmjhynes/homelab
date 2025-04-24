@@ -1,9 +1,10 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: freshrss-config
 data:
-  freshrss-user: |
+  freshrss-user: |-
     --email test@email.com
     --language en
     --user admin

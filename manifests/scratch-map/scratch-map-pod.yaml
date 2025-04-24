@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: Pod
 metadata:
@@ -6,5 +7,5 @@ metadata:
     app: scratch-map
 spec:
   containers:
-  - name: scratch-map
-    image: ad3m3r5/scratch-map:latest
+    - name: scratch-map
+      image: ad3m3r5/scratch-map:latest

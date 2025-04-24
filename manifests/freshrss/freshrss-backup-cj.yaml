@@ -1,3 +1,4 @@
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -5,22 +6,25 @@ metadata:
   namespace: default
 spec:
   # Backs up freshrss data once per day at 8pm
-  schedule: "0 20 * * *"
+  schedule: 0 20 * * *
   jobTemplate:
     spec:
       template:
         spec:
           restartPolicy: OnFailure
           containers:
-          - name: freshrss-backup
-            image: rclone/rclone:latest
-            command: ["/bin/sh", "-c", "rclone sync /tmp googledrive:homelab/freshrss-data"]
-            volumeMounts:
-              - name: freshrss-users
-                mountPath: /tmp
-            envFrom:
-            - secretRef:
-                name: rclone-config
+            - name: freshrss-backup
+              image: rclone/rclone:latest
+              command:
+                - /bin/sh
+                - -c
+                - rclone sync /tmp googledrive:homelab/freshrss-data
+              volumeMounts:
+                - name: freshrss-users
+                  mountPath: /tmp
+              envFrom:
+                - secretRef:
+                    name: rclone-config
           volumes:
             - name: freshrss-users
               hostPath:

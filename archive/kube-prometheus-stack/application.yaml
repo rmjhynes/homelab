@@ -1,3 +1,4 @@
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -8,10 +9,9 @@ spec:
   source:
     repoURL: https://prometheus-community.github.io/helm-charts
     chart: kube-prometheus-stack
-    targetRevision: "68.2.1"
+    targetRevision: 68.2.1
     helm:
-      valueFiles:
-        - values.yaml
+      valueFiles: [values.yaml]
   destination:
     # Resources applied to default k3s cluster
     name: in-cluster
@@ -20,5 +20,4 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+    syncOptions: [CreateNamespace=true]

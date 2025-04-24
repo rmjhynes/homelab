@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: Pod
 metadata:
@@ -6,5 +7,5 @@ metadata:
     app: ollama
 spec:
   containers:
-  - name: ollama
-    image: ollama/ollama:latest
+    - name: ollama
+      image: ollama/ollama:latest

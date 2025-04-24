@@ -1,10 +1,9 @@
+---
 image:
   repository: ghcr.io/gethomepage/homepage
   # tag: v0.6.0
-
 # Enable RBAC. RBAC is necessary to use Kubernetes integration
 enableRbac: false
-
 extraClusterRoles:
   # - apiGroups:
   #   - some-group
@@ -12,37 +11,37 @@ extraClusterRoles:
   #   - some-resource
   #   verbs:
   #   - get
-
 serviceAccount:
-  # Specify a different service account name. When blank it will default to the release
-  # name if *create* is enabled, otherwise it will refer to the default service account.
-  name: ""
+  # Specify a different service account name. When blank it will default to the
+  # release
+  # name if *create* is enabled, otherwise it will refer to the default service
+  # account.
+  name: ''
   # Create service account. Needed when RBAC is enabled.
   create: false
-
 service:
   main:
     ports:
       http:
         port: 3000
-
 controller:
   strategy: RollingUpdate
   rollingUpdate:
     maxSurge: 25%
     maxUnavailable: 25%
-
 # Enable the ingress to expose Homepage to the network.
 ingress:
   main:
     enabled: false
     # labels:
-    #   # This label will enable discover of this deployment in Homepage
+    #  # This label will enable discover of this deployment in Homepage
     #   gethomepage.dev/enabled: "true"
     # annotations:
-    #   # These annotations will configure how this deployment is shown in Homepage
+    #  # These annotations will configure how this deployment is shown in
+    #  # Homepage
     #   gethomepage.dev/name: "Homepage"
-    #   gethomepage.dev/description: "A modern, secure, highly customizable application dashboard."
+    #   gethomepage.dev/description: "A modern, secure, highly customizable
+    #   application dashboard."
     #   gethomepage.dev/group: "A New Group"
     #   gethomepage.dev/icon: "homepage.png"
     # ingressClassName: "nginx"
@@ -54,8 +53,8 @@ ingress:
     # tls:
     #   - hosts:
     #       - *host
-
-# All the config files for Homepage can be specified under their relevant config block.
+# All the config files for Homepage can be specified under their relevant
+# config block.
 config:
   # To use an existing ConfigMap uncomment this line and specify the name
   # useExistingConfigMap: existing-homepage-configmap
@@ -72,12 +71,10 @@ config:
               firstDayInWeek: monday
               view: monthly
               timezone: Europe/London
-    
     - My Second Group:
         - My Second Service:
             href: http://localhost/
             description: Homepage is the best
-
     - My Third Group:
         - Excalidraw:
             href: http://excalidraw.homelab
@@ -91,10 +88,10 @@ config:
         - Scratchmap:
             href: http://scratch-map.homelab
             description: Bookmark Manager
-
   widgets:
     - resources:
-        # change backend to 'kubernetes' to use Kubernetes integration. Requires RBAC.
+        # change backend to 'kubernetes' to use Kubernetes integration.
+        # Requires RBAC.
         backend: resources
         expanded: true
         cpu: true
@@ -126,7 +123,6 @@ config:
     mode: disable
   docker:
   settings:
-
 # -- Main environment variables. Template enabled.
 # Syntax options:
 # A) TZ: UTC
@@ -146,21 +142,18 @@ config:
 # F) - name: TZ
 #      value: '{{ .Release.Name }}'
 env:
-
-# To include environment variables from other configs or other secrets for use in
-# Homepage's variable substitutions. Refer to them here.
+# To include environment variables from other configs or other secrets for use
+# in Homepage's variable substitutions. Refer to them here.
 # envFrom:
 #   - secretRef:
 #       name: my-secret
 #   - configMapRef:
 #       name: my-configmap
-
 persistence:
   logs:
     enabled: true
     type: emptyDir
     mountPath: /app/config/logs
-
 # resources:
 #   requests:
 #     memory: 10Mi

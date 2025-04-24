@@ -1,3 +1,4 @@
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -7,81 +8,75 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   rules:
-  - host: home.homelab
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: homepage
-            port:
-              number: 3000
-
-  - host: argocd.homelab
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            # Points to a proxy service that routes to the
-            # argocd-server service in the argocd namespace
-            name: argocd-server-proxy
-            port:
-              number: 80
-
-  - host: freshrss.homelab
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: freshrss-service
-            port:
-              number: 80
-
-  - host: excalidraw.homelab
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: excalidraw-service
-            port:
-              number: 80
-
-  - host: linkding.homelab
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: linkding-service
-            port:
-              number: 9090
-
-  - host: scratch-map.homelab
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: scratch-map-service
-            port:
-              number: 8080
-
-  - host: open-webui.homelab
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: open-webui-service
-            port:
-              number: 3000
+    - host: home.homelab
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: homepage
+                port:
+                  number: 3000
+    - host: argocd.homelab
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                # Points to a proxy service that routes to the
+                # argocd-server service in the argocd namespace
+                name: argocd-server-proxy
+                port:
+                  number: 80
+    - host: freshrss.homelab
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: freshrss-service
+                port:
+                  number: 80
+    - host: excalidraw.homelab
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: excalidraw-service
+                port:
+                  number: 80
+    - host: linkding.homelab
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: linkding-service
+                port:
+                  number: 9090
+    - host: scratch-map.homelab
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: scratch-map-service
+                port:
+                  number: 8080
+    - host: open-webui.homelab
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: open-webui-service
+                port:
+                  number: 3000

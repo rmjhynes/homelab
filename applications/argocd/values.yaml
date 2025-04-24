@@ -1,3 +1,4 @@
+---
 configs:
   # Creates a secret for each key/value specified below so
   # ArgoCD can authenticate to the repository
@@ -5,7 +6,6 @@ configs:
     ssh-creds:
       url: git@github.com:rmjhynes/homelab.git
       sshPrivateKey:
-
   repositories:
     homelab-repo:
       name: Homelab

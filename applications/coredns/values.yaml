@@ -1,5 +1,5 @@
+---
 isClusterService: true
-
 servers:
   - zones:
       - zone: .
@@ -26,4 +26,3 @@ servers:
       - name: loop
       - name: reload
       - name: loadbalance
-

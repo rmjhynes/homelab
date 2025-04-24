@@ -22,6 +22,6 @@ For simplicity whilst I am starting out, the k3s cluster is made up of a single 
 
 ## Applications
 - [freshrss](https://github.com/FreshRSS/FreshRSS) - A self-hosted RSS feed aggregator.
-- [excalidraw](https://github.com/excalidraw/excalidraw) - A virtual whiteboard. 
+- [excalidraw](https://github.com/excalidraw/excalidraw) - A virtual whiteboard.
 - [linkding](https://github.com/sissbruecker/linkding) - A self-hosted bookmark manager.
 - [scratch-map](https://github.com/ad3m3r5/scratch-map) - A scratch-off style map to track my travels.

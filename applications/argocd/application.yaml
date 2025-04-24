@@ -1,8 +1,9 @@
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: argocd
-  namespace: argocd      
+  namespace: argocd
 spec:
   project: homelab
   source:
@@ -15,8 +16,14 @@ spec:
     namespace: argocd
   syncPolicy:
     automated:
-      prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
-      selfHeal: true # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
-      allowEmpty: false # Allows deleting all application resources during automatic syncing ( false by default ).   
-    syncOptions:
-      - CreateNamespace=true
+      # Specifies if resources should be pruned during auto-syncing ( false by
+      # default ).
+      prune: true
+      # Specifies if partial app sync should be executed when resources are
+      # changed only in target Kubernetes cluster and no git change detected
+      # ( false by default ).
+      selfHeal: true
+      # Allows deleting all application resources during automatic syncing
+      # ( false by default ).
+      allowEmpty: false
+      syncOptions: [CreateNamespace=true]

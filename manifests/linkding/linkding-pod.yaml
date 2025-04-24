@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: Pod
 metadata:
@@ -6,5 +7,5 @@ metadata:
     app: linkding
 spec:
   containers:
-  - name: linkding
-    image: sissbruecker/linkding:latest
+    - name: linkding
+      image: sissbruecker/linkding:latest
