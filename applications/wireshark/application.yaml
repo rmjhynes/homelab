@@ -1,0 +1,31 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wireshark
+  namespace: argocd
+spec:
+  project: homelab
+  source:
+    repoURL: https://github.com/rmjhynes/homelab.git
+    targetRevision: HEAD
+    path: manifests/wireshark
+    directory:
+      recurse: true
+  destination:
+    # Resources applied to default k3s cluster
+    name: in-cluster
+    namespace: default
+  syncPolicy:
+    automated:
+      # Specifies if resources should be pruned during auto-syncing ( false by
+      # default ).
+      prune: false
+      # Specifies if partial app sync should be executed when resources are
+      # changed only in target Kubernetes cluster and no git change detected
+      # ( false by default ).
+      selfHeal: true
+      # Allows deleting all application resources during automatic syncing
+      # ( false by default ).
+      allowEmpty: false
+      syncOptions: [CreateNamespace=true]

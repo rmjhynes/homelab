@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: wireshark
+  labels:
+    app: wireshark
+spec:
+  containers:
+    - name: wireshark
+      image: linuxserver/wireshark:latest
