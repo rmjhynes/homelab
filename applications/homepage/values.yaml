@@ -76,18 +76,27 @@ config:
             href: http://localhost/
             description: Homepage is the best
     - My Third Group:
-        - Excalidraw:
-            href: http://excalidraw.homelab
-            description: Excalidraw
+        - ArgoCD:
+            href: http://argocd.homelab
+            description: ArgoCD UI
         - Freshrss:
             href: http://freshrss.homelab
             description: RSS Feeds
+        - Excalidraw:
+            href: http://excalidraw.homelab
+            description: Excalidraw
         - Linkding:
             href: http://linkding.homelab
             description: Bookmark Manager
         - Scratchmap:
             href: http://scratch-map.homelab
             description: Bookmark Manager
+        - OpenWebUi:
+            href: http://open-webui.homelab
+            description: UI for Local LLMs
+        - Wireshark:
+            href: http://wireshark.homelab
+            description: Network Packet Analysis
   widgets:
     - resources:
         # change backend to 'kubernetes' to use Kubernetes integration.
