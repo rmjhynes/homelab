@@ -21,6 +21,7 @@ data:
         rewrite name linkding.homelab traefik.kube-system.svc.cluster.local
         rewrite name scratch-map.homelab traefik.kube-system.svc.cluster.local
         rewrite name open-webui.homelab traefik.kube-system.svc.cluster.local
+        rewrite name wireshark.homelab traefik.kube-system.svc.cluster.local
         forward . 8.8.8.8 1.1.1.1
         cache 30
         loop
