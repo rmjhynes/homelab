@@ -1,5 +1,13 @@
 # A script to delete clusterrole resources whenever I blowup my ArgoCD apps
 
+# Force delete namesapce stuck in terminating
+(
+NAMESPACE=argocd
+kubectl proxy &
+kubectl get namespace $NAMESPACE -o json |jq '.spec = {"finalizers":[]}' >temp.json
+curl -k -H "Content-Type: application/json" -X PUT --data-binary @temp.json 127.0.0.1:8001/api/v1/namespaces/$NAMESPACE/finalize
+)
+
 # Delete Argo clusterrole resources
 kubectl delete clusterrole argocd-server
 kubectl delete clusterrole argocd-notifications-controller
