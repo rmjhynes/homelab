@@ -350,7 +350,7 @@ customVolumes:
   # -- any volume type can be used here
   config:
     hostPath:
-      path: "~/pihole/etc-pihole/"
+      path: "/home/rmjhynes//pihole/etc-pihole/"
 
 monitoring:
   # -- Preferably adding prometheus scrape annotations rather than enabling podMonitor.
