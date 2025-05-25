@@ -10,11 +10,11 @@ spec:
     - repoURL: https://mojo2600.github.io/pihole-kubernetes/
       chart: pihole
       targetRevision: 2.31.0
-      #helm:
-        #valueFiles: [$values/applications/homepage/values.yaml]
-    #- repoURL: https://github.com/rmjhynes/homelab
-      #targetRevision: HEAD
-      #ref: values
+      helm:
+        valueFiles: [$values/applications/pihole/values.yaml]
+    - repoURL: https://github.com/rmjhynes/homelab
+      targetRevision: HEAD
+      ref: values
   destination:
     # Resources applied to default k3s cluster
     name: in-cluster
