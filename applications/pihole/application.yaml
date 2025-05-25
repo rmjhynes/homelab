@@ -1,0 +1,26 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pihole
+  namespace: argocd
+spec:
+  project: homelab
+  sources:
+    - repoURL: https://mojo2600.github.io/pihole-kubernetes/
+      chart: mojo2600
+      targetRevision: 2.31.0
+      #helm:
+        #valueFiles: [$values/applications/homepage/values.yaml]
+    #- repoURL: https://github.com/rmjhynes/homelab
+      #targetRevision: HEAD
+      #ref: values
+  destination:
+    # Resources applied to default k3s cluster
+    name: in-cluster
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions: [CreateNamespace=true]
