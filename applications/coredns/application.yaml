@@ -18,7 +18,7 @@ spec:
   destination:
     # Resources applied to default k3s cluster
     name: in-cluster
-    namespace: argocd
+    namespace: default
   syncPolicy:
     automated:
       # Specifies if resources should be pruned during auto-syncing ( false by
