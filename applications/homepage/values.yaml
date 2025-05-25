@@ -71,11 +71,11 @@ config:
               firstDayInWeek: monday
               view: monthly
               timezone: Europe/London
-    - My Second Group:
-        - My Second Service:
-            href: http://localhost/
-            description: Homepage is the best
-    - My Third Group:
+    - Admin:
+        - Gmail:
+            href: https://mail.google.com
+            description: Email
+    - Homelab Apps:
         - ArgoCD:
             href: http://argocd.homelab
             description: ArgoCD UI
@@ -97,6 +97,19 @@ config:
         - Wireshark:
             href: http://wireshark.homelab
             description: Network Packet Analysis
+    - AI:
+        - DeepSeek:
+            href: https://chat.deepseek.com
+        - ChatGPT:
+            href: https://chatgpt.com
+        - Claude:
+            href: https://claude.ai/new
+    - Media:
+        - YouTube:
+            href: https://www.youtube.com
+        - Soundcloud:
+            href: https://soundcloud.com
+
   widgets:
     - resources:
         # change backend to 'kubernetes' to use Kubernetes integration.
