@@ -335,9 +335,16 @@ dnsmasq:
   # - server=/bar.foo/192.168.178.11
 
   # -- Add custom dns entries to override the dns resolution. All lines will be added to the pihole dnsmasq configuration.
+  # Pihole DNS records that point to Traefik load balancer to access the
+  # applications via their respective service
   customDnsEntries:
+  - address=/home.homelab/10.43.224.97
+  - address=/freshrss.homelab/10.43.224.97
   - address=/excalidraw.homelab/10.43.224.97
-  # - address=/bar.foo/192.168.178.11
+  - address=/linkding.homelab/10.43.224.97
+  - address=/scratch-map.homelab/10.43.224.97
+  - address=/open-webui.homelab/10.43.224.97
+  - address=/wireshark.homelab/10.43.224.97
 
   # -- Dnsmasq reads the /etc/hosts file to resolve ips. You can add additional entries if you like
   additionalHostsEntries: []
