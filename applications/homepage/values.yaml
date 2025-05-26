@@ -94,9 +94,6 @@ config:
         - OpenWebUi:
             href: http://open-webui.homelab
             description: UI for Local LLMs
-        - Wireshark:
-            href: http://wireshark.homelab
-            description: Network Packet Analysis
     - AI:
         - DeepSeek:
             href: https://chat.deepseek.com
@@ -104,6 +101,13 @@ config:
             href: https://chatgpt.com
         - Claude:
             href: https://claude.ai/new
+    - Networking:
+        - Pi-hole:
+            href: http://pi.hole/admin/
+            description: Homelab DNS
+        - Wireshark:
+            href: http://wireshark.homelab
+            description: Network Packet Analysis
     - Media:
         - YouTube:
             href: https://www.youtube.com
