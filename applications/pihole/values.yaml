@@ -324,6 +324,50 @@ doh:
     podMonitor:
       enabled: false
 
+# -- DNS MASQ settings
+dnsmasq:
+  # -- Load custom user configuration files from /etc/dnsmasq.d
+  enableCustomDnsMasq: true
+
+  # -- Add upstream dns servers. All lines will be added to the pihole dnsmasq configuration
+  upstreamServers: []
+  # - server=/foo.bar/192.168.178.10
+  # - server=/bar.foo/192.168.178.11
+
+  # -- Add custom dns entries to override the dns resolution. All lines will be added to the pihole dnsmasq configuration.
+  customDnsEntries:
+  - address=/excalidraw.homelab/10.43.224.97
+  # - address=/bar.foo/192.168.178.11
+
+  # -- Dnsmasq reads the /etc/hosts file to resolve ips. You can add additional entries if you like
+  additionalHostsEntries: []
+  # - 192.168.0.3     host4
+  # - 192.168.0.4     host5
+
+  # -- Static DHCP config
+  staticDhcpEntries: []
+  # staticDhcpEntries:
+  # - dhcp-host=MAC_ADDRESS,IP_ADDRESS,HOSTNAME
+
+  # -- Other options
+  customSettings:
+  # otherSettings: |
+  #   rebind-domain-ok=/plex.direct/
+
+  # -- Here we specify custom cname entries that should point to `A` records or
+  # elements in customDnsEntries array.
+  # The format should be:
+  #  - cname=cname.foo.bar,foo.bar
+  #  - cname=cname.bar.foo,bar.foo
+  #  - cname=cname record,dns record
+  customCnameEntries: []
+  # Here we specify custom cname entries that should point to `A` records or
+  # elements in customDnsEntries array.
+  # The format should be:
+  #   - cname=cname.foo.bar,foo.bar
+  #   - cname=cname.bar.foo,bar.foo
+  #   - cname=cname record,dns record
+
 # -- port the container should use to expose HTTP traffic
 webHttp: "80"
 
