@@ -18,18 +18,6 @@ spec:
                 name: homepage
                 port:
                   number: 3000
-    - host: argocd.homelab
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                # Points to a proxy service that routes to the
-                # argocd-server service in the argocd namespace
-                name: argocd-server-proxy
-                port:
-                  number: 80
     - host: freshrss.homelab
       http:
         paths:
