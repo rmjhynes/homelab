@@ -339,6 +339,7 @@ dnsmasq:
   # applications via their respective service
   customDnsEntries:
   - address=/home.homelab/10.43.224.97
+  - address=/argocd.homelab/10.43.224.97
   - address=/freshrss.homelab/10.43.224.97
   - address=/excalidraw.homelab/10.43.224.97
   - address=/linkding.homelab/10.43.224.97
