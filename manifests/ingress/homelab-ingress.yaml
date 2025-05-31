@@ -29,7 +29,7 @@ spec:
                 # argocd-server service in the argocd namespace
                 name: argocd-server-proxy
                 port:
-                  number: 443
+                  number: 80
     - host: freshrss.homelab
       http:
         paths:
