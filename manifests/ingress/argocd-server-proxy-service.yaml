@@ -9,6 +9,6 @@ spec:
   externalName: argocd-server.argocd.svc.cluster.local
   ports:
     - port: 80
-      targetPort: 90
+      targetPort: 80
       protocol: TCP
       name: http
