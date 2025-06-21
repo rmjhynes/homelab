@@ -1,0 +1,20 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: qbittorrent
+  labels:
+    app: qbittorrent
+spec:
+  containers:
+  - image: lscr.io/linuxserver/qbittorrent:latest
+    name: qbittorrent
+    env:
+      - name: PUID
+        value: "1000"
+      - name: PGID
+        value: "1000"
+      - name: TZ
+        value: "UTC/GMT"
+      - name: WEBUI_PORT
+        value: "8080"
