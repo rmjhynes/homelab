@@ -1,2 +1,9 @@
 # Used when deleting namespaces
 temp.json
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
