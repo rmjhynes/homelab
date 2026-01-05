@@ -9,7 +9,7 @@ resource "helm_release" "argocd" {
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
   namespace  = kubernetes_namespace.argocd.metadata[0].name
-  version    = "latest"
+  version    = "9.2.4"
 
   depends_on = [kubernetes_namespace.argocd]
 }
