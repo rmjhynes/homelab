@@ -79,21 +79,21 @@ run_terraform() {
   terraform -chdir="${TERRAFORM_DIR}" init
 
   # Stage 1: Create namespace
-  log_info "Creating argocd namespace..."
+  log_info "Stage 1/3: Creating argocd namespace..."
   terraform -chdir="${TERRAFORM_DIR}" apply \
     -var="kubeconfig_path=${KUBECONFIG_PATH}" \
     -target=kubernetes_namespace.argocd \
     -auto-approve
 
   # Stage 2: Install ArgoCD helm chart (creates CRDs)
-  log_info "Installing ArgoCD helm chart..."
+  log_info "Stage 2/3: Installing ArgoCD helm chart..."
   terraform -chdir="${TERRAFORM_DIR}" apply \
     -var="kubeconfig_path=${KUBECONFIG_PATH}" \
     -target=helm_release.argocd \
     -auto-approve
 
   # Stage 3: Apply manifests (CRDs now exist)
-  log_info "Applying ArgoCD manifests..."
+  log_info "Stage 3/3: Applying ArgoCD project and root application maniftests ..."
   terraform -chdir="${TERRAFORM_DIR}" apply \
     -var="kubeconfig_path=${KUBECONFIG_PATH}" \
     -auto-approve
