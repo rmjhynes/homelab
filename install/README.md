@@ -19,20 +19,13 @@ Terraform is used **once** for initial cluster bootstrap. After that, ArgoCD tak
 
 ## Step 1: Bootstrap with Terraform
 
-The `terraform/` directory contains Terraform resources to bootstrap the homelab cluster incrementally:
+Run the bootstrap script to deploy ArgoCD to your k3s cluster:
 
 ```bash
-terraform init
-
-# Step 1: Create the ArgoCD namespace
-terraform apply -target=kubernetes_namespace.argocd
-
-# Step 2: Install ArgoCD (creates the CRDs)
-terraform apply -target=helm_release.argocd
-
-# Step 3: Apply the AppProject and root Application
-terraform apply
+./bootstrap.sh
 ```
+
+The script checks dependencies, verifies cluster connectivity, then runs Terraform incrementally.
 
 ### Why the incremental apply?
 
@@ -43,7 +36,7 @@ Terraform validates all resources during the planning phase before creating anyt
 3. The CRDs only get created when `helm_release.argocd` is applied
 4. But Terraform validates everything before applying anything
 
-This incremental approach with the `-target` bypasses errors by:
+The script handles this by running Terraform in three stages:
 1. First apply: Create the namespace
 2. Second apply: Install ArgoCD via Helm (which creates the CRDs)
 3. Third apply: Now that CRDs exist, Terraform can validate and apply the remaining resources
@@ -73,7 +66,7 @@ Test the bootstrap process locally before deploying to the homelab using k3d (k3
 
 ### Prerequisites
 
-- Docker and Podman
+- Docker
 - k3d
 - Terraform
 - kubectl
@@ -92,7 +85,7 @@ bash test-local.sh down
 ```
 
 The script will:
-1. Start the Podman machine if needed (macOS)
+1. Check that Docker is running
 2. Create a k3d cluster named `homelab-test`
 3. Run Terraform to bootstrap ArgoCD in the container
 4. Wait for ArgoCD to be ready
@@ -144,6 +137,3 @@ For full cluster teardown (re-import ArgoCD to state first if needed):
 terraform destroy
 ```
 
-## Archive
-
-The original `bootstrap.sh` script has been moved to `archive/bootstrap.sh` for reference.
