@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Get the directory where this script lives
+# Get the directory where this script lives, regardless of where it's called from
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TERRAFORM_DIR="${SCRIPT_DIR}/terraform"
 
@@ -62,7 +62,7 @@ run_terraform() {
     -auto-approve
 
   # Stage 3: Apply manifests (CRDs now exist)
-  log_info "Stage 3/3: Applying ArgoCD project and root application..."
+  log_info "Stage 3/3: Applying ArgoCD project and root application manifests..."
   terraform -chdir="${TERRAFORM_DIR}" apply \
     -auto-approve
 
