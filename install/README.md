@@ -62,7 +62,22 @@ This removes ArgoCD from Terraform's state without deleting it from the cluster.
 
 ## Local Testing with k3d
 
-Test the bootstrap process locally before deploying to the homelab using k3d (k3s in a container).
+Test the bootstrap process locally before deploying to the live homelab clsuter using k3d (k3s in a container).
+
+### Kubeconfig Behavior
+
+When `test-local.sh up` is run, k3d automatically merges the test cluster's config into `$HOME/.kube/config` and switches the current context. This means:
+
+- The existing cluster configs (live k3s cluster) remain intact
+- `kubectl` commands will target the test cluster until context
+- When `test-local.sh down` is run, k3d removes the test cluster's entries from kubeconfig
+
+To switch between clusters:
+
+```bash
+kubectl config get-contexts          # List all contexts
+kubectl config use-context <name>    # Switch to a specific cluster
+```
 
 ### Prerequisites
 

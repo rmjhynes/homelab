@@ -53,6 +53,8 @@ cleanup() {
     "${TERRAFORM_DIR}/terraform.tfstate.backup"
 
   log_info "Cleanup complete"
+  log_warn "Remember to switch kubectl context back to the live cluster:"
+  echo "  kubectl config use-context <live-cluster-context>"
 }
 
 create_cluster() {
@@ -119,6 +121,10 @@ show_access_info() {
   echo ""
   echo "  To use kubectl with this cluster:"
   echo "  export KUBECONFIG=${KUBECONFIG_PATH}"
+  echo ""
+  echo "  NOTE: The kubectl context has been switched to the test cluster."
+  echo "  To switch back to the live cluster:"
+  echo "  kubectl config use-context <live-cluster-context>"
   echo "========================================"
 }
 
