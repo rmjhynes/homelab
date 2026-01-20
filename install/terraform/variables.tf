@@ -9,4 +9,3 @@ variable "target_revision" {
   type        = string
   default     = "HEAD"
 }
-

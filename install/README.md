@@ -83,7 +83,7 @@ kubectl config use-context <name>    # Switch to a specific cluster
 
 The script automatically detects the current git branch and configures ArgoCD to sync from that branch. This allows testing feature branch changes before merging to main. For example, if the current feature branch is `feature/new-app`, the script will configure ArgoCD's `targetRevision` to `feature/new-app` instead of `HEAD` and pull this into the k3d container.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > The branch must be pushed to GitHub for ArgoCD to sync it.
 
 ### Prerequisites
@@ -158,4 +158,3 @@ For full cluster teardown (re-import ArgoCD to state first if needed):
 ```bash
 terraform destroy
 ```
-
