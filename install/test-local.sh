@@ -7,6 +7,7 @@ TERRAFORM_DIR="${SCRIPT_DIR}/terraform"
 
 CLUSTER_NAME="homelab-test"
 KUBECONFIG_PATH="/tmp/${CLUSTER_NAME}-kubeconfig"
+TARGET_REVISION=$(git branch --show-current)
 
 # Colours for output
 RED='\033[0;31m'
@@ -77,6 +78,7 @@ create_cluster() {
 
 run_terraform() {
   log_info "Running Terraform..."
+  log_info "Target revision: ${TARGET_REVISION}"
 
   terraform -chdir="${TERRAFORM_DIR}" init
 
@@ -84,6 +86,7 @@ run_terraform() {
   log_info "Stage 1/3: Creating argocd namespace..."
   terraform -chdir="${TERRAFORM_DIR}" apply \
     -var="kubeconfig_path=${KUBECONFIG_PATH}" \
+    -var="target_revision=${TARGET_REVISION}" \
     -target=kubernetes_namespace.argocd \
     -auto-approve
 
@@ -91,6 +94,7 @@ run_terraform() {
   log_info "Stage 2/3: Installing ArgoCD helm chart..."
   terraform -chdir="${TERRAFORM_DIR}" apply \
     -var="kubeconfig_path=${KUBECONFIG_PATH}" \
+    -var="target_revision=${TARGET_REVISION}" \
     -target=helm_release.argocd \
     -auto-approve
 
@@ -98,6 +102,7 @@ run_terraform() {
   log_info "Stage 3/3: Applying ArgoCD project and root application maniftests ..."
   terraform -chdir="${TERRAFORM_DIR}" apply \
     -var="kubeconfig_path=${KUBECONFIG_PATH}" \
+    -var="target_revision=${TARGET_REVISION}" \
     -auto-approve
 
   log_info "Terraform apply complete"

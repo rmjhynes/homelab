@@ -21,7 +21,13 @@ resource "kubernetes_manifest" "argocd_project" {
 }
 
 resource "kubernetes_manifest" "argocd_applications" {
-  manifest = yamldecode(file("${path.module}/../applications.yaml"))
+  manifest = yamldecode(
+    replace(
+      file("${path.module}/../applications.yaml"),
+      "targetRevision: HEAD",
+      "targetRevision: ${var.target_revision}"
+    )
+  )
 
   depends_on = [helm_release.argocd]
 }

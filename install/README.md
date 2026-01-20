@@ -79,6 +79,13 @@ kubectl config get-contexts          # List all contexts
 kubectl config use-context <name>    # Switch to a specific cluster
 ```
 
+### Branch Testing
+
+The script automatically detects the current git branch and configures ArgoCD to sync from that branch. This allows testing feature branch changes before merging to main. For example, if the current feature branch is `feature/new-app`, the script will configure ArgoCD's `targetRevision` to `feature/new-app` instead of `HEAD` and pull this into the k3d container.
+
+> [!IMPORTANT]  
+> The branch must be pushed to GitHub for ArgoCD to sync it.
+
 ### Prerequisites
 
 - Docker
