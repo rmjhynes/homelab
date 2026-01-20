@@ -152,7 +152,7 @@ cmd_status() {
   export KUBECONFIG="${KUBECONFIG_PATH}"
   echo ""
   log_info "Cluster status:"
-  k3d cluster list | grep "${CLUSTER_NAME}"
+  k3d cluster list | awk -v name="${CLUSTER_NAME}" 'NR==1 || $0 ~ name'
   echo ""
   log_info "ArgoCD pods:"
   kubectl get pods -n argocd 2>/dev/null || echo "ArgoCD namespace not found"
