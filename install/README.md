@@ -66,11 +66,11 @@ Test the bootstrap process locally before deploying to the live homelab clsuter 
 
 ### Kubeconfig Behavior
 
-When `test-local.sh up` is run, k3d automatically merges the test cluster's config into `$HOME/.kube/config` and switches the current context. This means:
+When `test_local.sh up` is run, k3d automatically merges the test cluster's config into `$HOME/.kube/config` and switches the current context. This means:
 
 - The existing cluster configs (live k3s cluster) remain intact
 - `kubectl` commands will target the test cluster until context
-- When `test-local.sh down` is run, k3d removes the test cluster's entries from kubeconfig
+- When `test_local.sh down` is run, k3d removes the test cluster's entries from kubeconfig
 
 To switch between clusters:
 
@@ -97,13 +97,13 @@ The script automatically detects the current git branch and configures ArgoCD to
 
 ```bash
 # Spin up test cluster and deploy ArgoCD
-bash test-local.sh up
+bash test_local.sh up
 
 # Check status
-bash test-local.sh status
+bash test_local.sh status
 
 # Cleanup
-bash test-local.sh down
+bash test_local.sh down
 ```
 
 The script will:
@@ -137,7 +137,7 @@ k3d runs a k3s cluster inside a container and exposes the API server on localhos
 
 ### Accessing ArgoCD
 
-After `test-local.sh up` completes, run these commands on your local machine (not inside any container):
+After `test_local.sh up` completes, run these commands on your local machine (not inside any container):
 
 ```bash
 # Point kubectl at the test cluster
