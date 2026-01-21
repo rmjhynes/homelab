@@ -54,12 +54,6 @@ terraform state rm helm_release.argocd
 
 This removes ArgoCD from Terraform's state without deleting it from the cluster. ArgoCD now fully owns itself.
 
-### What this means
-
-- ArgoCD config changes: Make changes in `applications/argocd/`, commit to git, ArgoCD syncs automatically
-- Terraform: Only used for disaster recovery or rebuilding from scratch
-- No more duplicates: ArgoCD is the single source of truth
-
 ## Local Testing with k3d
 
 Test the bootstrap process locally before deploying to the live homelab clsuter using k3d (k3s in a container).
