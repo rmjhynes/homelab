@@ -43,34 +43,32 @@ The script handles this by running Terraform in three stages:
 
 ## Step 2: Handoff to ArgoCD
 
-After bootstrap, ArgoCD syncs and begins managing itself via `applications/argocd/`. This creates temporary duplicate resources (Terraform's install + ArgoCD's self-managed install).
-
-To complete the handoff and let ArgoCD be the sole owner:
+After bootstrap, ArgoCD syncs and begins managing itself via [the argocd application manifest](../applications/argocd/application.yaml), there are duplicate ArgoCD resources (Terraform's install + ArgoCD's self-managed install). To complete the handoff and let ArgoCD be the sole owner:
 
 ```bash
 cd terraform
 terraform state rm helm_release.argocd
 ```
 
-This removes ArgoCD from Terraform's state without deleting it from the cluster. ArgoCD now fully owns itself.
+This removes ArgoCD from Terraform's state without deleting it from the cluster so that ArgoCD now fully manages itself.
 
 ## Local Testing with k3d
 
-Test the bootstrap process locally before deploying to the live homelab clsuter using k3d (k3s in a container).
+Any changes to the cluster can be tested locally before merging to main using k3d (k3s in a container) with the [test_local.sh script](test_local.sh).
 
 ### Kubeconfig Behavior
 
 When `test_local.sh up` is run, k3d automatically merges the test cluster's config into `$HOME/.kube/config` and switches the current context. This means:
 
 - The existing cluster configs (live k3s cluster) remain intact
-- `kubectl` commands will target the test cluster until context
+- `kubectl` commands will target the test cluster until context is switched back to the live Homelab cluster
 - When `test_local.sh down` is run, k3d removes the test cluster's entries from kubeconfig
 
 To switch between clusters:
 
 ```bash
-kubectl config get-contexts          # List all contexts
-kubectl config use-context <name>    # Switch to a specific cluster
+kubectl config get-contexts
+kubectl config use-context <name>
 ```
 
 ### Branch Testing
@@ -84,41 +82,41 @@ The script automatically detects the current git branch and configures ArgoCD to
 
 - Docker
 - k3d
-- Terraform
 - kubectl
+- Terraform
 
 ### Usage
 
 ```bash
-# Spin up test cluster and deploy ArgoCD
+# Create test cluster and deploy ArgoCD to sync feature branch changes
 bash test_local.sh up
 
-# Check status
+# Check status of the cluster
 bash test_local.sh status
 
-# Cleanup
+# Teardown cluster container
 bash test_local.sh down
 ```
 
 The script will:
-1. Check that Docker is running
+1. Check that dependencies are installed
 2. Create a k3d cluster named `homelab-test`
 3. Run Terraform to bootstrap ArgoCD in the container
 4. Wait for ArgoCD to be ready
 5. Display access info (port-forward command, credentials)
 
-### How it works
+### Architecture
 
-k3d runs a k3s cluster inside a container and exposes the API server on localhost. Terraform connects via a generated kubeconfig:
+k3d runs a k3s cluster inside a container and exposes the API server on localhost. The Terraform Kubernetes provider reads the kubeconfig file to authenticate and connect to the cluster's API server, allowing it to provision the ArgoCD resources:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Your Machine (Host)                                            │
+│  Homelab machine                                                │
 │                                                                 │
 │  ┌──────────────┐      ┌────────────────────────────────────┐   │
 │  │  Terraform   │      │  k3d Container                     │   │
 │  │              │      │  ┌──────────────────────────────┐  │   │
-│  │  reads       │      │  │  k3s cluster                 │  │   │
+│  │  Reads       │      │  │  k3s cluster                 │  │   │
 │  │  kubeconfig ─┼──────┼──▶  API server on port 6443     │  │   │
 │  │              │      │  │                              │  │   │
 │  └──────────────┘      │  └──────────────────────────────┘  │   │
@@ -128,22 +126,6 @@ k3d runs a k3s cluster inside a container and exposes the API server on localhos
 │  (contains: server: https://localhost:XXXXX)                    │
 └─────────────────────────────────────────────────────────────────┘
 ```
-
-### Accessing ArgoCD
-
-After `test_local.sh up` completes, run these commands on your local machine (not inside any container):
-
-```bash
-# Point kubectl at the test cluster
-export KUBECONFIG=/tmp/homelab-test-kubeconfig
-
-# Forward local port 8080 to ArgoCD server
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-```
-
-Then open https://localhost:8080 in your browser (username: `admin`, password shown in script output).
-
-Note: `kubectl port-forward` runs locally and tunnels through the Kubernetes API - no container shell access needed.
 
 ## Teardown
 
