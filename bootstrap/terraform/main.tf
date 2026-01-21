@@ -1,0 +1,33 @@
+resource "kubernetes_namespace" "argocd" {
+  metadata {
+    name = "argocd"
+  }
+}
+
+resource "helm_release" "argocd" {
+  name       = "argocd"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+  namespace  = kubernetes_namespace.argocd.metadata[0].name
+  version    = "9.2.4"
+
+  depends_on = [kubernetes_namespace.argocd]
+}
+
+resource "kubernetes_manifest" "argocd_project" {
+  manifest = yamldecode(file("${path.module}/../project.yaml"))
+
+  depends_on = [helm_release.argocd]
+}
+
+resource "kubernetes_manifest" "argocd_applications" {
+  manifest = yamldecode(
+    replace(
+      file("${path.module}/../applications.yaml"),
+      "targetRevision: HEAD",
+      "targetRevision: ${var.target_revision}"
+    )
+  )
+
+  depends_on = [helm_release.argocd]
+}
