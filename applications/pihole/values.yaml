@@ -29,7 +29,9 @@ dualStack:
 
 dnsHostPort:
   # -- set this to true to enable dnsHostPort
-  enabled: false
+  # Maps container port 53 directly to the node's port 53, making Pi-hole
+  # accessible as a DNS server at the node IP (192.168.1.52:53)
+  enabled: true
   # -- default port for this pod
   port: 53
 
@@ -335,17 +337,9 @@ dnsmasq:
   # - server=/bar.foo/192.168.178.11
 
   # -- Add custom dns entries to override the dns resolution. All lines will be added to the pihole dnsmasq configuration.
-  # Pihole DNS records that point to Traefik load balancer to access the
-  # applications via their respective service
+  # Wildcard DNS entry - resolves ANY *.homelab domain to the node IP where Traefik is listening
   customDnsEntries:
-  - address=/home.homelab/10.43.224.97
-  - address=/argocd.homelab/10.43.224.97
-  - address=/freshrss.homelab/10.43.224.97
-  - address=/excalidraw.homelab/10.43.224.97
-  - address=/linkding.homelab/10.43.224.97
-  - address=/scratch-map.homelab/10.43.224.97
-  - address=/open-webui.homelab/10.43.224.97
-  - address=/wireshark.homelab/10.43.224.97
+  - address=/homelab/192.168.1.52
 
   # -- Dnsmasq reads the /etc/hosts file to resolve ips. You can add additional entries if you like
   additionalHostsEntries: []
