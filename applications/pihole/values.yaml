@@ -29,7 +29,9 @@ dualStack:
 
 dnsHostPort:
   # -- set this to true to enable dnsHostPort
-  enabled: false
+  # Maps container port 53 directly to the node's port 53, making Pi-hole
+  # accessible as a DNS server at the node IP (192.168.1.52:53)
+  enabled: true
   # -- default port for this pod
   port: 53
 
