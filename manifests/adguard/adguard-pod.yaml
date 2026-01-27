@@ -1,0 +1,42 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: adguard
+  labels:
+    app: adguard
+spec:
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  nodeSelector:
+    kubernetes.io/hostname: homelab
+  # Creates storage dirs on host before main container starts
+  # This makes the deployment fully GitOps - no manual SSH yo node to create directories
+  initContainers:
+    - name: init-storage-dirs
+      image: busybox
+      command: ['sh', '-c', 'mkdir -p /storage/work /storage/conf']
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+        - mountPath: /storage
+          name: host-storage
+  containers:
+    - name: adguard
+      image: adguard/adguardhome
+      volumeMounts:
+        - mountPath: /opt/adguardhome/work
+          name: data
+        - mountPath: /opt/adguardhome/conf
+          name: configuration
+  volumes:
+    - name: host-storage
+      hostPath:
+        path: /var/lib/rancher/k3s/storage/adguard
+        type: DirectoryOrCreate
+    - name: data
+      persistentVolumeClaim:
+        claimName: adguard-work-pvc
+    - name: configuration
+      persistentVolumeClaim:
+        claimName: adguard-conf-pvc
