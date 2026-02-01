@@ -8,7 +8,7 @@ Having no experience managing a production grade Kubernetes platform, setting up
 - Beelink S12 Mini Pro (16 GB RAM, 500GB SSD)
 
 ## OS
-For ease of reproducability and decalarative configuration, NixOS is my distro of choice for my homelab. The actual configuration can be found in my [nixos-config](https://github.com/rmjhynes/nixos-config) repo.
+Fedora is my distro of choice for my homelab; it offers stability and ease of use out of the box, and being Red Hat-based makes it a great way to build familiarity with enterprise Linux environments. The machine configuration is managed with [Ansible](https://github.com/rmjhynes/ansible-homelab-setup).
 
 ## Cluster
 For simplicity whilst I am starting out, the k3s cluster is made up of a single node. I will be looking to use a multi-node architecture when I am more confident.
