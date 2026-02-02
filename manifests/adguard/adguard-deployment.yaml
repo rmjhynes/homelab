@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adguard
+  labels:
+    app: adguard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adguard
+  template:
+    metadata:
+      labels:
+        app: adguard
+      annotations:
+        reloader.stakater.com/auto: "true"
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        kubernetes.io/hostname: homelab
+      initContainers:
+        - name: copy-config
+          image: busybox
+          command: ['sh', '-c', 'cp /config-template/AdGuardHome.yaml /opt/adguardhome/conf/AdGuardHome.yaml']
+          volumeMounts:
+            - name: config-template
+              mountPath: /config-template
+            - name: conf
+              mountPath: /opt/adguardhome/conf
+      containers:
+        - name: adguard
+          image: adguard/adguardhome
+          volumeMounts:
+            - mountPath: /opt/adguardhome/work
+              name: work
+            - mountPath: /opt/adguardhome/conf
+              name: conf
+      volumes:
+        - name: config-template
+          configMap:
+            name: adguard-config
+        - name: work
+          hostPath:
+            path: /var/lib/rancher/k3s/storage/adguard/work
+            type: DirectoryOrCreate
+        - name: conf
+          hostPath:
+            path: /var/lib/rancher/k3s/storage/adguard/conf
+            type: DirectoryOrCreate
