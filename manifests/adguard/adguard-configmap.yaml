@@ -156,21 +156,29 @@ data:
       parental_block_host: family-block.dns.adguard.com
       safebrowsing_block_host: standard-block.dns.adguard.com
       rewrites:
-        - domain: home.homelab
+        - enabled: true
+          domain: home.homelab
           answer: 192.168.1.21
-        - domain: argocd.homelab
+        - enabled: true
+          domain: argocd.homelab
           answer: 192.168.1.21
-        - domain: freshrss.homelab
+        - enabled: true
+          domain: freshrss.homelab
           answer: 192.168.1.21
-        - domain: excalidraw.homelab
+        - enabled: true
+          domain: excalidraw.homelab
           answer: 192.168.1.21
-        - domain: linkding.homelab
+        - enabled: true
+          domain: linkding.homelab
           answer: 192.168.1.21
-        - domain: scratch-map.homelab
+        - enabled: true
+          domain: scratch-map.homelab
           answer: 192.168.1.21
-        - domain: open-webui.homelab
+        - enabled: true
+          domain: open-webui.homelab
           answer: 192.168.1.21
-        - domain: wireshark.homelab
+        - enabled: true
+          domain: wireshark.homelab
           answer: 192.168.1.21
       safe_fs_patterns:
         - /opt/adguardhome/work/userfilters/*
