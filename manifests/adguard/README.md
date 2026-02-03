@@ -12,14 +12,17 @@ Access `http://<machine-ip>:3000`:
 
 ### 2. Configure Local Machine DNS
 
-For systemd-resolved (persistent):
+Configure NetworkManager to use AdGuard and ignore DHCP-provided DNS:
+
 ```bash
-sudo mkdir -p /etc/systemd/resolved.conf.d
-sudo tee /etc/systemd/resolved.conf.d/adguard.conf << EOF
-[Resolve]
-DNS=127.0.0.1:53
-EOF
-sudo systemctl restart systemd-resolved
+nmcli con mod "<wifi-name>" ipv4.dns "127.0.0.1"
+nmcli con mod "<wifi-name>" ipv4.ignore-auto-dns yes
+nmcli con down "<wifi-name>" && nmcli con up "<wifi-name>"
+```
+
+Verify with:
+```bash
+resolvectl status wlo1
 ```
 
 ### 3. Verify DNS
@@ -54,7 +57,7 @@ When `hostNetwork: true` is set, the pod shares the **host's** network namespace
 │  Local Machine                                     │
 │                                                    │
 │   ┌─────────────────┐       ┌──────────────────┐   │
-│   │ systemd-resolved│─────▶│ AdGuard Pod      │   │
+│   │ NetworkManager  │─────▶│ AdGuard Pod      │   │
 │   │ DNS=127.0.0.1   │       │ (hostNetwork)    │   │
 │   └─────────────────┘       │                  │   │
 │                             │ 127.0.0.1:53 DNS │   │
@@ -76,19 +79,4 @@ The `DirectoryOrCreate` type means Kubernetes creates these directories automati
 
 ## Local DNS Configuration
 
-The local machine uses systemd-resolved to route DNS queries to AdGuard:
-
-```ini
-# /etc/systemd/resolved.conf.d/adguard.conf
-[Resolve]
-DNS=127.0.0.1:53
-```
-
-### DNS Fallback Behavior
-
-If AdGuard goes down, systemd-resolved automatically falls back to DHCP-provided DNS servers from the network router. This provides resilience without explicit `FallbackDNS` configuration.
-
-To verify current DNS sources:
-```bash
-resolvectl status
-```
+NetworkManager is configured to use AdGuard (`127.0.0.1`) for DNS and ignore DHCP-provided servers. This ensures custom `.homelab` domains resolve correctly via AdGuard's DNS rewrites.
