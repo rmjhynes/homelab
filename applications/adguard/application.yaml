@@ -18,14 +18,8 @@ spec:
     namespace: default
   syncPolicy:
     automated:
-      # Specifies if resources should be pruned during auto-syncing ( false by
-      # default ).
-      prune: false
-      # Specifies if partial app sync should be executed when resources are
-      # changed only in target Kubernetes cluster and no git change detected
-      # ( false by default ).
+      prune: true
       selfHeal: true
-      # Allows deleting all application resources during automatic syncing
-      # ( false by default ).
       allowEmpty: false
-      syncOptions: [CreateNamespace=true]
+    syncOptions:
+      - CreateNamespace=true
