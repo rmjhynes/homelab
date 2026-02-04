@@ -1,5 +1,11 @@
 ---
 configs:
+  params:
+    # Route HTTP traffic to argocd-server so that http://argocd.homelab resolves
+    # https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#traefik-v30
+    # https://argo-cd.readthedocs.io/en/stable/operator-manual/server-commands/additional-configuration-method/
+    # https://github.com/argoproj/argo-helm/blob/b8fc7466465c617f270256ded8d6c6d3d57ea524/charts/argo-cd/values.yaml#L434
+    server.insecure: true
   # Creates a secret for each key/value specified below so
   # ArgoCD can authenticate to the repository
   credentialTemplates:
