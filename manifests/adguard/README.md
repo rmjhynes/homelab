@@ -7,8 +7,8 @@
 Access `http://<machine-ip>:3000`:
 - Create admin username/password
 - Configure listen interfaces (defaults are usually fine with hostNetwork)
-    - Admin was `127.0.0.1:3001`
-    - DNS was `127.0.0.1:53`
+    - Admin: `0.0.0.0:3001`
+    - DNS: `127.0.0.1:53`
 
 ### 2. Configure Local Machine DNS
 
@@ -32,11 +32,13 @@ dig @192.168.1.21 google.com
 ```
 
 ### 4. Access AdGuard UI
-Navigate to `127.0.0.1:3001`
+Navigate to `adguard.homelab`
 
 ## Architecture
 
 AdGuard runs as a bare Pod with `hostNetwork: true`, binding directly to the host's network interfaces. This allows it to serve DNS on port 53 without NodePort or LoadBalancer complexity.
+
+The admin UI binds to `0.0.0.0:3001` (all interfaces) rather than `127.0.0.1:3001`. This is necessary because the Kubernetes Service routes traffic to the node's actual IP, not `127.0.0.1`. If the UI only listened on localhost, the Service couldn't reach it and the `adguard.homelab` ingress wouldn't work. DNS remains on `127.0.0.1:53` since it's accessed directly via the host network, not through a Service.
 
 ### DNS Policy: `ClusterFirstWithHostNet`
 
@@ -61,7 +63,7 @@ When `hostNetwork: true` is set, the pod shares the **host's** network namespace
 │   │ DNS=127.0.0.1   │       │ (hostNetwork)    │   │
 │   └─────────────────┘       │                  │   │
 │                             │ 127.0.0.1:53 DNS │   │
-│                             │ 127.0.0.1:3001 UI│   │
+│                             │ 0.0.0.0:3001  UI │   │
 │                             └──────────────────┘   │
 └────────────────────────────────────────────────────┘
 ```
