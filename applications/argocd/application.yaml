@@ -6,10 +6,15 @@ metadata:
   namespace: argocd
 spec:
   project: homelab
-  source:
-    chart: argo-cd
-    repoURL: https://argoproj.github.io/argo-helm
-    targetRevision: 7.7.16
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-cd
+      targetRevision: 7.7.16
+      helm:
+        valueFiles: [$values/applications/argocd/values.yaml]
+    - repoURL: https://github.com/rmjhynes/homelab
+      targetRevision: HEAD
+      ref: values
   destination:
     # Resources applied to default k3s cluster
     name: in-cluster
