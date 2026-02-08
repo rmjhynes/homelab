@@ -102,8 +102,8 @@ config:
         - Claude:
             href: https://claude.ai/new
     - Networking:
-        - Pi-hole:
-            href: http://pi.hole/admin/
+        - Adguard:
+            href: http://adguard.homelab
             description: Homelab DNS
         - Wireshark:
             href: http://wireshark.homelab
