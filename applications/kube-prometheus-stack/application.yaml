@@ -6,12 +6,15 @@ metadata:
   namespace: argocd
 spec:
   project: homelab
-  source:
-    repoURL: https://prometheus-community.github.io/helm-charts
-    chart: kube-prometheus-stack
-    targetRevision: 72.6.2
-    helm:
-      valueFiles: [values.yaml]
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: 81.5.0
+      helm:
+        valueFiles: [$values/applications/kube-prometheus-stack/values.yaml]
+    - repoURL: https://github.com/rmjhynes/homelab
+      targetRevision: HEAD
+      ref: values
   destination:
     # Resources applied to default k3s cluster
     name: in-cluster
