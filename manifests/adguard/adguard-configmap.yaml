@@ -158,28 +158,28 @@ data:
       rewrites:
         - enabled: true
           domain: home.homelab
-          answer: 192.168.1.21
+          answer: 127.0.0.1
         - enabled: true
           domain: argocd.homelab
-          answer: 192.168.1.21
+          answer: 127.0.0.1
         - enabled: true
           domain: freshrss.homelab
-          answer: 192.168.1.21
+          answer: 127.0.0.1
         - enabled: true
           domain: excalidraw.homelab
-          answer: 192.168.1.21
+          answer: 127.0.0.1
         - enabled: true
           domain: linkding.homelab
-          answer: 192.168.1.21
+          answer: 127.0.0.1
         - enabled: true
           domain: scratch-map.homelab
-          answer: 192.168.1.21
+          answer: 127.0.0.1
         - enabled: true
           domain: open-webui.homelab
-          answer: 192.168.1.21
+          answer: 127.0.0.1
         - enabled: true
           domain: wireshark.homelab
-          answer: 192.168.1.21
+          answer: 127.0.0.1
       safe_fs_patterns:
         - /opt/adguardhome/work/userfilters/*
       safebrowsing_cache_size: 1048576
