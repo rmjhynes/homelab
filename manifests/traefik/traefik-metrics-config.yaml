@@ -17,5 +17,6 @@ spec:
         port: 9100
         expose:
           default: true
-        exposedPort: 9100
+        # Avoid 9100 to prevent hostPort conflict with node-exporter
+        exposedPort: 9101
         protocol: TCP
