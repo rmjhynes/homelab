@@ -20,9 +20,19 @@ nmcli con mod "<wifi-name>" ipv4.ignore-auto-dns yes
 nmcli con down "<wifi-name>" && nmcli con up "<wifi-name>"
 ```
 
+> [!NOTE]  
+> `8.8.8.8` is the fallback DNS in case the adguard deployment goes down and the internet cannot be accessed to redeploy (via Argocd)
+
 Verify with:
 ```bash
 resolvectl status wlo1
+
+Link 3 (wlo1)
+    Current Scopes: DNS LLMNR/IPv4 LLMNR/IPv6
+         Protocols: +DefaultRoute LLMNR=resolve -mDNS -DNSOverTLS DNSSEC=no/unsupported
+Current DNS Server: 127.0.0.1
+       DNS Servers: 127.0.0.1 8.8.8.8
+     Default Route: yes
 ```
 
 ### 3. Verify DNS
