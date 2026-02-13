@@ -15,7 +15,7 @@ Access `http://<machine-ip>:3000`:
 Configure NetworkManager to use AdGuard and ignore DHCP-provided DNS:
 
 ```bash
-nmcli con mod "<wifi-name>" ipv4.dns "127.0.0.1"
+nmcli con mod "<wifi-name>" ipv4.dns "127.0.0.1 8.8.8.8"
 nmcli con mod "<wifi-name>" ipv4.ignore-auto-dns yes
 nmcli con down "<wifi-name>" && nmcli con up "<wifi-name>"
 ```
