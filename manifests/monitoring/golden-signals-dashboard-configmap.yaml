@@ -25,6 +25,7 @@ data:
           }
         ]
       },
+      "description": "Inspired by https://sre.google/sre-book/monitoring-distributed-systems/",
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 1,
@@ -1081,6 +1082,6 @@ data:
       "timezone": "browser",
       "title": "Golden Signals",
       "uid": "golden-signals-dashboard",
-      "version": 2,
+      "version": 6,
       "weekStart": "monday"
     }
