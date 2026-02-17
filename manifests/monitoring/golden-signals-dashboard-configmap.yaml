@@ -25,6 +25,7 @@ data:
           }
         ]
       },
+      "description": "Inspired by https://sre.google/sre-book/monitoring-distributed-systems/",
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 1,
@@ -294,44 +295,6 @@ data:
           },
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": true,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisGridShow": true,
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "showValues": false,
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
@@ -346,7 +309,7 @@ data:
                   }
                 ]
               },
-              "unit": "reqps"
+              "unit": "short"
             },
             "overrides": []
           },
@@ -358,20 +321,21 @@ data:
           },
           "id": 3,
           "options": {
-            "legend": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
               "calcs": [
-                "mean",
-                "max"
+                "lastNotNull"
               ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true
+              "fields": "",
+              "values": false
             },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "multi",
-              "sort": "desc"
-            }
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
           },
           "pluginVersion": "12.3.1",
           "targets": [
@@ -388,7 +352,7 @@ data:
             }
           ],
           "title": "Total Request Rate",
-          "type": "timeseries"
+          "type": "stat"
         },
         {
           "datasource": {
@@ -1081,6 +1045,6 @@ data:
       "timezone": "browser",
       "title": "Golden Signals",
       "uid": "golden-signals-dashboard",
-      "version": 2,
+      "version": 4,
       "weekStart": "monday"
     }
