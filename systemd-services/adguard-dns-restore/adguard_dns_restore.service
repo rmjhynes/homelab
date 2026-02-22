@@ -1,0 +1,12 @@
+[Unit]
+Description=Restore Adguard (running within k3s cluster) as primary DNS once pod is running
+After=k3s.service
+
+[Service]
+ExecStart=/usr/local/bin/adguard_dns_restore.sh
+Type=oneshot
+RemainAfterExit=yes
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
