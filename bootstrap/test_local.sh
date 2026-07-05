@@ -77,7 +77,6 @@ run_terraform() {
   log_info "Target revision: ${TARGET_REVISION}"
 
   run_terraform_staged \
-    -state="${TF_STATE_PATH}" \
     -var="kubeconfig_path=${KUBECONFIG_PATH}" \
     -var="target_revision=${TARGET_REVISION}"
 }

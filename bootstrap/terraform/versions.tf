@@ -11,6 +11,10 @@ terraform {
       version = "~> 2.0"
     }
   }
+
+  backend "local" {
+    path = "/tmp/homelab-test.tfstate"
+  }
 }
 
 provider "kubernetes" {
