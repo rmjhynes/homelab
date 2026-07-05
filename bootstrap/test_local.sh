@@ -3,7 +3,7 @@ set -e
 
 # Get the directory where this script lives, regardless of where it's called from
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TERRAFORM_DIR="${SCRIPT_DIR}/terraform"
+source "${SCRIPT_DIR}/common.sh"
 
 CLUSTER_NAME="homelab-test"
 KUBECONFIG_PATH="/tmp/${CLUSTER_NAME}-kubeconfig"
@@ -16,38 +16,11 @@ REPO_URL="https://github.com/rmjhynes/homelab"
 TF_STATE_PATH="/tmp/${CLUSTER_NAME}.tfstate"
 export TF_DATA_DIR="/tmp/${CLUSTER_NAME}-tfdata"
 
-# Colours for output
-RED='\033[0;31m'
-CYAN='\033[0;36m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Colour
-
-# Render log text with specific colour depending on log type
-log_info() { echo -e "${CYAN}[INFO]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
-
-check_dependencies() {
-  log_info "Checking dependencies..."
-  local missing=()
-
-  command -v k3d >/dev/null 2>&1 || missing+=("k3d")
-  command -v terraform >/dev/null 2>&1 || missing+=("terraform")
-  command -v kubectl >/dev/null 2>&1 || missing+=("kubectl")
-  command -v docker >/dev/null 2>&1 || missing+=("docker")
-  command -v jq >/dev/null 2>&1 || missing+=("jq")
-
-  if [ ${#missing[@]} -ne 0 ]; then
-    log_error "Missing dependencies: ${missing[*]}"
-    exit 1
-  fi
-
+check_docker_running() {
   if ! docker info >/dev/null 2>&1; then
     log_error "Docker is not running"
     exit 1
   fi
-
-  log_info "All dependencies found"
 }
 
 # Determine the git branch ArgoCD should sync from
@@ -101,38 +74,12 @@ create_cluster() {
 }
 
 run_terraform() {
-  log_info "Running Terraform..."
   log_info "Target revision: ${TARGET_REVISION}"
 
-  terraform -chdir="${TERRAFORM_DIR}" init
-
-  # Stage 1: Create namespace
-  log_info "Stage 1/3: Creating argocd namespace..."
-  terraform -chdir="${TERRAFORM_DIR}" apply \
+  run_terraform_staged \
     -state="${TF_STATE_PATH}" \
     -var="kubeconfig_path=${KUBECONFIG_PATH}" \
-    -var="target_revision=${TARGET_REVISION}" \
-    -target=kubernetes_namespace.argocd \
-    -auto-approve
-
-  # Stage 2: Install ArgoCD helm chart (creates CRDs)
-  log_info "Stage 2/3: Installing ArgoCD helm chart..."
-  terraform -chdir="${TERRAFORM_DIR}" apply \
-    -state="${TF_STATE_PATH}" \
-    -var="kubeconfig_path=${KUBECONFIG_PATH}" \
-    -var="target_revision=${TARGET_REVISION}" \
-    -target=helm_release.argocd \
-    -auto-approve
-
-  # Stage 3: Apply manifests (CRDs now exist)
-  log_info "Stage 3/3: Applying ArgoCD project and root application manifests..."
-  terraform -chdir="${TERRAFORM_DIR}" apply \
-    -state="${TF_STATE_PATH}" \
-    -var="kubeconfig_path=${KUBECONFIG_PATH}" \
-    -var="target_revision=${TARGET_REVISION}" \
-    -auto-approve
-
-  log_info "Terraform apply complete"
+    -var="target_revision=${TARGET_REVISION}"
 }
 
 # Child Applications in applications/ pin targetRevision: HEAD, which ArgoCD
@@ -204,8 +151,7 @@ show_access_info() {
   export KUBECONFIG="${KUBECONFIG_PATH}"
 
   local password
-  password=$(kubectl -n argocd get secret argocd-initial-admin-secret \
-    -o jsonpath="{.data.password}" 2>/dev/null | base64 -d || echo "not yet available")
+  password=$(get_argocd_password)
 
   echo ""
   echo "========================================"
@@ -224,16 +170,6 @@ show_access_info() {
   echo "  NOTE: The test cluster is NOT merged into ~/.kube/config, so plain"
   echo "  kubectl still points at the live cluster."
   echo "========================================"
-}
-
-wait_for_argocd() {
-  log_info "Waiting for ArgoCD to be ready..."
-  export KUBECONFIG="${KUBECONFIG_PATH}"
-
-  kubectl wait --for=condition=available deployment/argocd-server \
-    -n argocd --timeout=300s
-
-  log_info "ArgoCD is ready"
 }
 
 cmd_status() {
@@ -255,7 +191,8 @@ cmd_status() {
 }
 
 cmd_up() {
-  check_dependencies
+  check_dependencies k3d terraform kubectl docker jq
+  check_docker_running
   resolve_target_revision
   create_cluster
   run_terraform
