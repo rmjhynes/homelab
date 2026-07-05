@@ -1,6 +1,7 @@
 #!/bin/bash
 # Shared helpers for bootstrap.sh and test_local.sh. This file is sourced, not
-# executed; sourcing scripts must define SCRIPT_DIR first.
+# executed; sourcing scripts must define SCRIPT_DIR first, and must set
+# TF_STATE_PATH before calling run_terraform_staged.
 
 TERRAFORM_DIR="${SCRIPT_DIR}/terraform"
 
@@ -36,11 +37,16 @@ check_dependencies() {
 # Run the incremental Terraform bootstrap. Terraform validates
 # kubernetes_manifest resources during planning, but the ArgoCD CRDs they need
 # don't exist until the Helm chart is installed, hence the three -target
-# stages. Any arguments are passed through to every apply (e.g. -state, -var).
+# stages. Any arguments are passed through to every apply (e.g. -var).
 run_terraform_staged() {
   log_info "Running Terraform..."
 
-  terraform -chdir="${TERRAFORM_DIR}" init
+  # The backend block in versions.tf is intentionally empty; the state path is
+  # supplied here so the live cluster and test runs keep separate state files.
+  # -reconfigure lets the same working directory switch between paths.
+  terraform -chdir="${TERRAFORM_DIR}" init \
+    -reconfigure \
+    -backend-config="path=${TF_STATE_PATH}"
 
   # Stage 1: Create namespace
   log_info "Stage 1/3: Creating argocd namespace..."

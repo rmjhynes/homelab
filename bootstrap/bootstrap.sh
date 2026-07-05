@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -euo pipefail
 
 # Get the directory where this script lives, regardless of where it's called from
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,6 +9,10 @@ source "${SCRIPT_DIR}/common.sh"
 # connectivity check and the applies are guaranteed to hit the same cluster
 KUBECONFIG_PATH="${KUBECONFIG:-$HOME/.kube/config}"
 export KUBECONFIG="${KUBECONFIG_PATH}"
+
+# Live cluster state lives alongside the terraform config (gitignored), which
+# is where the handoff and teardown steps in BOOTSTRAP.md expect it
+TF_STATE_PATH="${TERRAFORM_DIR}/terraform.tfstate"
 
 check_kubeconfig() {
   # Terraform's config_path only accepts a single file, not kubectl's
