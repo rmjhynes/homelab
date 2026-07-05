@@ -43,7 +43,7 @@ The script handles this by running Terraform in three stages:
 
 ## Step 2: Handoff to ArgoCD
 
-After bootstrap, ArgoCD syncs and begins managing itself via [the argocd application manifest](../applications/argocd/application.yaml), there are duplicate ArgoCD resources (Terraform's install + ArgoCD's self-managed install). To complete the handoff and let ArgoCD be the sole owner:
+After bootstrap, ArgoCD syncs and begins managing itself via [the argocd application manifest](../applications/argocd/application.yaml). The ArgoCD install now has two owners: Terraform's state and the self-managed argocd Application. To complete the handoff and let ArgoCD be the sole owner:
 
 ```bash
 cd terraform
@@ -52,10 +52,24 @@ terraform state rm helm_release.argocd
 
 This removes ArgoCD from Terraform's state without deleting it from the cluster so that ArgoCD now fully manages itself.
 
-## Teardown
+Don't re-run `bootstrap.sh` after the handoff — the Helm release still exists in the cluster but is no longer in Terraform's state, so the apply would fail. The script detects this and exits early with an explanation.
 
-For full cluster teardown (re-import ArgoCD to state first if needed):
+## Accessing ArgoCD
+
+The `https://argocd.homelab` URL printed by the script requires the argocd application's ingress (created on its first sync) and Pi-hole DNS resolving `*.homelab`. Until both are in place, port-forward instead:
 
 ```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:80
+```
+
+Then browse to `http://localhost:8080` (plain HTTP — the server runs in insecure mode because Traefik terminates TLS at the ingress).
+
+## Teardown
+
+For full cluster teardown, re-import ArgoCD to state first (it was removed during the handoff), then destroy:
+
+```bash
+cd terraform
+terraform import helm_release.argocd argocd/argocd
 terraform destroy
 ```
