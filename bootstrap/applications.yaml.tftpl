@@ -8,7 +8,7 @@ spec:
   project: homelab
   source:
     repoURL: https://github.com/rmjhynes/homelab.git
-    targetRevision: HEAD
+    targetRevision: ${target_revision}
     path: applications
     directory:
       recurse: true
@@ -23,8 +23,10 @@ spec:
       prune: false
       # Specifies if partial app sync should be executed when resources are
       # changed only in target Kubernetes cluster and no git change detected
-      # ( false by default ).
-      selfHeal: true
+      # ( false by default ). When testing a branch (target_revision != HEAD),
+      # selfHeal is disabled so that test_local.sh can patch child Applications
+      # to sync from the branch without the root app reverting them.
+      selfHeal: ${self_heal}
       # Allows deleting all application resources during automatic syncing
       # ( false by default ).
       allowEmpty: false

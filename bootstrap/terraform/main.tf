@@ -23,20 +23,12 @@ resource "kubernetes_manifest" "argocd_project" {
 }
 
 resource "kubernetes_manifest" "argocd_applications" {
-  # When testing a branch (target_revision != HEAD), selfHeal is disabled so
-  # that test_local.sh can patch child Applications to sync from the branch
-  # without the root app reverting them
-  manifest = yamldecode(
-    replace(
-      replace(
-        file("${path.module}/../applications.yaml"),
-        "targetRevision: HEAD",
-        "targetRevision: ${var.target_revision}"
-      ),
-      "selfHeal: true",
-      var.target_revision == "HEAD" ? "selfHeal: true" : "selfHeal: false"
-    )
-  )
+  # selfHeal is disabled when testing a branch; see the comment on selfHeal in
+  # the template
+  manifest = yamldecode(templatefile("${path.module}/../applications.yaml.tftpl", {
+    target_revision = var.target_revision
+    self_heal       = var.target_revision == "HEAD"
+  }))
 
   depends_on = [helm_release.argocd]
 }
