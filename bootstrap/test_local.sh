@@ -7,7 +7,14 @@ TERRAFORM_DIR="${SCRIPT_DIR}/terraform"
 
 CLUSTER_NAME="homelab-test"
 KUBECONFIG_PATH="/tmp/${CLUSTER_NAME}-kubeconfig"
-TARGET_REVISION=$(git branch --show-current)
+# Applications reference this repo both with and without the .git suffix, so
+# comparisons against it strip the suffix first
+REPO_URL="https://github.com/rmjhynes/homelab"
+
+# Keep all mutable Terraform artifacts (providers, state) in /tmp so test runs
+# never touch the live cluster's state in the repo terraform directory
+TF_STATE_PATH="/tmp/${CLUSTER_NAME}.tfstate"
+export TF_DATA_DIR="/tmp/${CLUSTER_NAME}-tfdata"
 
 # Colours for output
 RED='\033[0;31m'
@@ -28,6 +35,7 @@ check_dependencies() {
   command -v terraform >/dev/null 2>&1 || missing+=("terraform")
   command -v kubectl >/dev/null 2>&1 || missing+=("kubectl")
   command -v docker >/dev/null 2>&1 || missing+=("docker")
+  command -v jq >/dev/null 2>&1 || missing+=("jq")
 
   if [ ${#missing[@]} -ne 0 ]; then
     log_error "Missing dependencies: ${missing[*]}"
@@ -42,31 +50,47 @@ check_dependencies() {
   log_info "All dependencies found"
 }
 
+# Determine the git branch ArgoCD should sync from
+resolve_target_revision() {
+  TARGET_REVISION=$(git -C "${SCRIPT_DIR}" branch --show-current)
+
+  if [ -z "${TARGET_REVISION}" ]; then
+    log_warn "Could not determine current branch (detached HEAD?), defaulting to HEAD"
+    TARGET_REVISION="HEAD"
+    return
+  fi
+
+  # ArgoCD pulls from GitHub, so it can only sync branches that exist there
+  if ! git -C "${SCRIPT_DIR}" ls-remote --exit-code origin "refs/heads/${TARGET_REVISION}" >/dev/null 2>&1; then
+    log_warn "Branch '${TARGET_REVISION}' not found on origin - push it or ArgoCD will fail to sync"
+  fi
+}
+
 cleanup() {
   log_info "Cleaning up..."
-  if k3d cluster list 2>/dev/null | grep -q "${CLUSTER_NAME}"; then
+  if k3d cluster get "${CLUSTER_NAME}" >/dev/null 2>&1; then
     k3d cluster delete "${CLUSTER_NAME}"
   fi
 
-  rm -f "${KUBECONFIG_PATH}"
-  rm -rf "${TERRAFORM_DIR}/.terraform" \
-    "${TERRAFORM_DIR}/terraform.tfstate" \
-    "${TERRAFORM_DIR}/terraform.tfstate.backup"
+  rm -f "${KUBECONFIG_PATH}" "${TF_STATE_PATH}" "${TF_STATE_PATH}.backup"
+  rm -rf "${TF_DATA_DIR}"
 
   log_info "Cleanup complete"
-  log_warn "Remember to switch kubectl context back to the live cluster:"
-  echo "  kubectl config use-context <live-cluster-context>"
 }
 
 create_cluster() {
   log_info "Creating k3d cluster '${CLUSTER_NAME}'..."
 
-  if k3d cluster list 2>/dev/null | grep -q "${CLUSTER_NAME}"; then
+  if k3d cluster get "${CLUSTER_NAME}" >/dev/null 2>&1; then
     log_warn "Cluster '${CLUSTER_NAME}' already exists, deleting..."
     k3d cluster delete "${CLUSTER_NAME}"
   fi
 
-  k3d cluster create "${CLUSTER_NAME}" --wait
+  # Keep the test cluster out of ~/.kube/config; the script and the user
+  # access it via the dedicated kubeconfig in /tmp instead
+  k3d cluster create "${CLUSTER_NAME}" --wait \
+    --kubeconfig-update-default=false \
+    --kubeconfig-switch-context=false
 
   k3d kubeconfig get "${CLUSTER_NAME}" > "${KUBECONFIG_PATH}"
   export KUBECONFIG="${KUBECONFIG_PATH}"
@@ -85,6 +109,7 @@ run_terraform() {
   # Stage 1: Create namespace
   log_info "Stage 1/3: Creating argocd namespace..."
   terraform -chdir="${TERRAFORM_DIR}" apply \
+    -state="${TF_STATE_PATH}" \
     -var="kubeconfig_path=${KUBECONFIG_PATH}" \
     -var="target_revision=${TARGET_REVISION}" \
     -target=kubernetes_namespace.argocd \
@@ -93,19 +118,86 @@ run_terraform() {
   # Stage 2: Install ArgoCD helm chart (creates CRDs)
   log_info "Stage 2/3: Installing ArgoCD helm chart..."
   terraform -chdir="${TERRAFORM_DIR}" apply \
+    -state="${TF_STATE_PATH}" \
     -var="kubeconfig_path=${KUBECONFIG_PATH}" \
     -var="target_revision=${TARGET_REVISION}" \
     -target=helm_release.argocd \
     -auto-approve
 
   # Stage 3: Apply manifests (CRDs now exist)
-  log_info "Stage 3/3: Applying ArgoCD project and root application maniftests ..."
+  log_info "Stage 3/3: Applying ArgoCD project and root application manifests..."
   terraform -chdir="${TERRAFORM_DIR}" apply \
+    -state="${TF_STATE_PATH}" \
     -var="kubeconfig_path=${KUBECONFIG_PATH}" \
     -var="target_revision=${TARGET_REVISION}" \
     -auto-approve
 
   log_info "Terraform apply complete"
+}
+
+# Child Applications in applications/ pin targetRevision: HEAD, which ArgoCD
+# resolves to main. Point their homelab repo sources at the branch under test
+# instead. The root app is deployed with selfHeal disabled when testing a
+# branch (see terraform/main.tf) so these patches are not reverted.
+patch_child_apps() {
+  if [ "${TARGET_REVISION}" = "HEAD" ]; then
+    return
+  fi
+
+  export KUBECONFIG="${KUBECONFIG_PATH}"
+
+  log_info "Waiting for the root application to create child applications..."
+  local apps=""
+  local deadline=$((SECONDS + 180))
+  while [ ${SECONDS} -lt ${deadline} ]; do
+    apps=$(kubectl get applications -n argocd -o name 2>/dev/null \
+      | grep -v "^application.argoproj.io/applications$" || true)
+    if [ -n "${apps}" ]; then
+      break
+    fi
+    sleep 5
+  done
+
+  if [ -z "${apps}" ]; then
+    log_warn "No child applications appeared after 180s - is branch '${TARGET_REVISION}' pushed to GitHub?"
+    log_warn "Skipping branch override"
+    return
+  fi
+
+  # The root app's sync creates all children near-simultaneously; a short
+  # settle catches any stragglers from the same sync operation
+  sleep 5
+  apps=$(kubectl get applications -n argocd -o name 2>/dev/null \
+    | grep -v "^application.argoproj.io/applications$" || true)
+
+  log_info "Patching child applications to sync from '${TARGET_REVISION}'..."
+  local app original patched
+  for app in ${apps}; do
+    original=$(kubectl get "${app}" -n argocd -o json)
+
+    # Retarget sources pointing at this repo's HEAD; leave pinned Helm chart
+    # versions and other repos untouched. Handles both single-source
+    # (.spec.source) and multi-source (.spec.sources) Applications
+    patched=$(echo "${original}" | jq --arg repo "${REPO_URL}" --arg rev "${TARGET_REVISION}" '
+      {spec: (.spec
+        | if has("source") and (.source.repoURL | rtrimstr(".git")) == $repo
+              and .source.targetRevision == "HEAD"
+            then .source.targetRevision = $rev else . end
+        | if has("sources")
+            then .sources |= map(
+              if (.repoURL | rtrimstr(".git")) == $repo and .targetRevision == "HEAD"
+                then .targetRevision = $rev else . end)
+            else . end)}')
+
+    if [ "$(echo "${original}" | jq -c .spec)" = "$(echo "${patched}" | jq -c .spec)" ]; then
+      continue
+    fi
+
+    kubectl patch "${app}" -n argocd --type merge -p "${patched}" >/dev/null
+    log_info "  Patched ${app#application.argoproj.io/}"
+  done
+
+  log_info "Branch override complete"
 }
 
 show_access_info() {
@@ -119,17 +211,18 @@ show_access_info() {
   echo "========================================"
   echo "  ArgoCD Access Info"
   echo "========================================"
-  echo "  Port forward: kubectl port-forward svc/argocd-server -n argocd 8080:443"
-  echo "  URL:          https://localhost:8080"
+  echo "  To use kubectl with this cluster, define an alias:"
+  echo "  alias kt='kubectl --kubeconfig ${KUBECONFIG_PATH}'"
+  echo ""
+  # ArgoCD runs in insecure (plain HTTP) mode once the self-managed app
+  # applies applications/argocd/values.yaml, so use the service's HTTP port
+  echo "  Port forward: kt port-forward svc/argocd-server -n argocd 8080:80"
+  echo "  URL:          http://localhost:8080"
   echo "  Username:     admin"
   echo "  Password:     ${password}"
   echo ""
-  echo "  To use kubectl with this cluster:"
-  echo "  export KUBECONFIG=${KUBECONFIG_PATH}"
-  echo ""
-  echo "  NOTE: The kubectl context has been switched to the test cluster."
-  echo "  To switch back to the live cluster:"
-  echo "  kubectl config use-context <live-cluster-context>"
+  echo "  NOTE: The test cluster is NOT merged into ~/.kube/config, so plain"
+  echo "  kubectl still points at the live cluster."
   echo "========================================"
 }
 
@@ -144,7 +237,7 @@ wait_for_argocd() {
 }
 
 cmd_status() {
-  if ! k3d cluster list 2>/dev/null | grep -q "${CLUSTER_NAME}"; then
+  if ! k3d cluster get "${CLUSTER_NAME}" >/dev/null 2>&1; then
     log_warn "Cluster '${CLUSTER_NAME}' does not exist"
     exit 0
   fi
@@ -163,9 +256,11 @@ cmd_status() {
 
 cmd_up() {
   check_dependencies
+  resolve_target_revision
   create_cluster
   run_terraform
   wait_for_argocd
+  patch_child_apps
   show_access_info
   log_info "Test environment ready. Run '$0 down' to cleanup."
 }

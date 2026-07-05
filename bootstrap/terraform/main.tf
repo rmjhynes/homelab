@@ -9,7 +9,9 @@ resource "helm_release" "argocd" {
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
   namespace  = kubernetes_namespace.argocd.metadata[0].name
-  version    = "9.2.4"
+  # Must match the version in applications/argocd/application.yaml, otherwise
+  # the self-managed ArgoCD immediately replaces the bootstrapped install
+  version    = "7.7.16"
 
   depends_on = [kubernetes_namespace.argocd]
 }
@@ -21,11 +23,18 @@ resource "kubernetes_manifest" "argocd_project" {
 }
 
 resource "kubernetes_manifest" "argocd_applications" {
+  # When testing a branch (target_revision != HEAD), selfHeal is disabled so
+  # that test_local.sh can patch child Applications to sync from the branch
+  # without the root app reverting them
   manifest = yamldecode(
     replace(
-      file("${path.module}/../applications.yaml"),
-      "targetRevision: HEAD",
-      "targetRevision: ${var.target_revision}"
+      replace(
+        file("${path.module}/../applications.yaml"),
+        "targetRevision: HEAD",
+        "targetRevision: ${var.target_revision}"
+      ),
+      "selfHeal: true",
+      var.target_revision == "HEAD" ? "selfHeal: true" : "selfHeal: false"
     )
   )
 
