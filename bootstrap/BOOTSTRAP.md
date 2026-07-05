@@ -70,6 +70,8 @@ For full cluster teardown, re-import ArgoCD to state first (it was removed durin
 
 ```bash
 cd terraform
-terraform import helm_release.argocd argocd/argocd
-terraform destroy
+terraform import -var="kubeconfig_path=$HOME/.kube/config" helm_release.argocd argocd/argocd
+terraform destroy -var="kubeconfig_path=$HOME/.kube/config"
 ```
+
+The `kubeconfig_path` variable has no default, so pass it explicitly (or answer the prompt) when running Terraform outside the bootstrap script.
