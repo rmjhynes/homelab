@@ -2,12 +2,15 @@
 
 Summary of fixes applied to get AdGuard DNS rewrites working with Traefik ingress.
 
+> [!NOTE]
+> Fixes 1-3 are automated by [`host-setup/setup.sh`](../../host-setup/setup.sh) (idempotent, safe to re-run) - prefer running that over applying them manually.
+
 ## 1. System DNS Configuration
 
 By default, NetworkManager uses DNS servers provided by DHCP (typically a router or ISP). These external servers don't know about the custom `.homelab` domains and will return `NXDOMAIN`. Configure NetworkManager to use AdGuard (`127.0.0.1`) so DNS queries actually use the AdGuard rewrites:
 
 ```bash
-nmcli con mod "<wifi-name>" ipv4.dns "127.0.0.1"
+nmcli con mod "<wifi-name>" ipv4.dns "127.0.0.1 8.8.8.8"
 nmcli con mod "<wifi-name>" ipv4.ignore-auto-dns yes
 nmcli con down "<wifi-name>" && nmcli con up "<wifi-name>"
 ```

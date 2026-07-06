@@ -12,6 +12,9 @@ Access `http://<machine-ip>:3000`:
 
 ### 2. Configure Local Machine DNS
 
+> [!NOTE]
+> This step (and the rest of the host-level config) is automated by [`host-setup/setup.sh`](../../host-setup/setup.sh) - prefer running that.
+
 Configure NetworkManager to use AdGuard and ignore DHCP-provided DNS:
 
 ```bash

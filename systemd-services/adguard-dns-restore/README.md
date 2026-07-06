@@ -20,7 +20,7 @@ The installer symlinks `adguard_dns_restore.sh` into `/usr/local/bin` and `adgua
 
 ### When the script should be used
 
-Run it **once** on the homelab machine as part of host setup (alongside the NetworkManager DNS config and firewalld rules in `manifests/adguard/ISSUES.md`). After that the service triggers itself on every boot so nothing needs running manually.
+Run it **once** on the homelab machine as part of host setup - the easiest way is `host-setup/setup.sh` at the repo root, which runs this installer alongside the other host config (NetworkManager DNS, firewalld rules). After that the service triggers itself on every boot so nothing needs running manually.
 
 Re-run it only if:
 
