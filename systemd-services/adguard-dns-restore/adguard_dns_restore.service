@@ -1,12 +1,21 @@
 [Unit]
 Description=Restore Adguard (running within k3s cluster) as primary DNS once pod is running
+# After= only orders startup (don't run the script before k3s has started);
+# Wants= makes it an actual dependency so k3s gets pulled in if not already up
 After=k3s.service
+Wants=k3s.service
 
 [Service]
 ExecStart=/usr/local/bin/adguard_dns_restore.sh
+# oneshot: run the script to completion once per boot, no long-running daemon
 Type=oneshot
+# Keep the unit 'active' after the script exits so it doesn't show as 'dead'
+# and won't be re-triggered by later dependency changes
 RemainAfterExit=yes
-Restart=no
+# Backstop: oneshot units otherwise default to TimeoutStartSec=infinity,
+# which would leave the unit 'activating' forever and block multi-user.target
+# if the script ever hung (the script also has its own 300s deadline)
+TimeoutStartSec=360
 
 [Install]
 WantedBy=multi-user.target
