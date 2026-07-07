@@ -7,6 +7,7 @@ source "${SCRIPT_DIR}/common.sh"
 
 CLUSTER_NAME="homelab-test"
 KUBECONFIG_PATH="/tmp/${CLUSTER_NAME}-kubeconfig"
+
 # Applications reference this repo both with and without the .git suffix, so
 # comparisons against it strip the suffix first
 REPO_URL="https://github.com/rmjhynes/homelab"
@@ -23,19 +24,31 @@ check_docker_running() {
   fi
 }
 
-# Determine the git branch ArgoCD should sync from
+# Determine the git branch that ArgoCD should sync from and any changes not
+# pushed to remote
 resolve_target_revision() {
-  TARGET_REVISION=$(git -C "${SCRIPT_DIR}" branch --show-current)
+  TARGET_REVISION=$(git branch --show-current)
 
   if [ -z "${TARGET_REVISION}" ]; then
-    log_warn "Could not determine current branch (detached HEAD?), defaulting to HEAD"
-    TARGET_REVISION="HEAD"
+    log_warn "Could not determine current branch (detached HEAD?) - exiting..."
+    exit 1
     return
   fi
 
   # ArgoCD pulls from GitHub, so it can only sync branches that exist there
-  if ! git -C "${SCRIPT_DIR}" ls-remote --exit-code origin "refs/heads/${TARGET_REVISION}" >/dev/null 2>&1; then
+  if ! git ls-remote --exit-code origin "refs/heads/${TARGET_REVISION}" >/dev/null 2>&1; then
     log_warn "Branch '${TARGET_REVISION}' not found on origin - push it or ArgoCD will fail to sync"
+    # --exit-code exits with status "2" when no matching refs are found in the
+    # remote repository.
+  fi
+
+  local unpushed_commits=$(git rev-list --count @{u}..HEAD)
+  if [ "${unpushed_commits}" -gt 0 ]; then
+    log_warn "You have ${unpushed_commits} commit(s) not yet pushed to remote - the test cluster may not include all expected changes"
+  fi
+
+  if [ -n "$(git status --porcelain)" ]; then
+    log_warn "Uncommitted changes exist - you may want to commit and push these to see the changes reflected in the test cluster"
   fi
 }
 
@@ -55,7 +68,7 @@ create_cluster() {
   log_info "Creating k3d cluster '${CLUSTER_NAME}'..."
 
   if k3d cluster get "${CLUSTER_NAME}" >/dev/null 2>&1; then
-    log_warn "Cluster '${CLUSTER_NAME}' already exists, deleting..."
+    log_warn "Cluster '${CLUSTER_NAME}' already exists - deleting..."
     k3d cluster delete "${CLUSTER_NAME}"
   fi
 
@@ -70,7 +83,7 @@ create_cluster() {
 
   log_info "Waiting for cluster to be ready..."
   kubectl wait --for=condition=Ready nodes --all --timeout=120s
-  log_info "Cluster ready"
+  log_info "Cluster is ready"
 }
 
 run_terraform() {
@@ -190,7 +203,7 @@ cmd_status() {
 }
 
 cmd_up() {
-  check_dependencies k3d terraform kubectl docker jq
+  check_dependencies docker k3d kubectl jq terraform
   check_docker_running
   resolve_target_revision
   create_cluster

@@ -5,22 +5,22 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/common.sh"
 
-# Resolve the kubeconfig once and use it for both kubectl and Terraform, so the
-# connectivity check and the applies are guaranteed to hit the same cluster
+# Set to $KUBE_CONFIG env var value or if empty default to $HOME/.kube/config
 KUBECONFIG_PATH="${KUBECONFIG:-$HOME/.kube/config}"
 export KUBECONFIG="${KUBECONFIG_PATH}"
 
-# Live cluster state lives alongside the terraform config (gitignored), which
-# is where the handoff and teardown steps in BOOTSTRAP.md expect it
 TF_STATE_PATH="${TERRAFORM_DIR}/terraform.tfstate"
 
+# kubectl accepts a colon-separated list of kubeconfig files that it merges
+# (e.g. KUBECONFIG="$HOME/.kube/config:$HOME/.kube/test_cluster"), but
+# the Terraform k8s provider config_path takes a single file.
+# This function fails early with a clear message instead of passing a multi-path
+# value that the provider can't use.
 check_kubeconfig() {
-  # Terraform's config_path only accepts a single file, not kubectl's
-  # colon-separated path list
   case "${KUBECONFIG_PATH}" in
     *:*)
       log_error "KUBECONFIG contains multiple paths: ${KUBECONFIG_PATH}"
-      log_error "Terraform can only read a single kubeconfig file - set KUBECONFIG to one path"
+      log_error "The terraform k8s provider can only read a single kubeconfig file - set KUBECONFIG to one file path"
       exit 1
       ;;
   esac
@@ -41,7 +41,7 @@ check_cluster() {
 
 # After the handoff to ArgoCD (terraform state rm helm_release.argocd), a
 # re-run would fail mid-apply with Helm's "cannot re-use a name that is still
-# in use" error, so catch that state up front with a clear message
+# in use" error. This function exits in case of a re-run.
 check_not_bootstrapped() {
   if kubectl -n argocd get deployment argocd-server >/dev/null 2>&1 \
     && ! terraform -chdir="${TERRAFORM_DIR}" state list 2>/dev/null \
@@ -76,6 +76,8 @@ show_access_info() {
   log_info "Bootstrap complete. ArgoCD will now sync applications from git."
 }
 
+# If unknown argument is passed at script runtime, print out how the script can
+# be run with a description of its purpose.
 print_usage() {
   echo "Usage: $0"
   echo ""

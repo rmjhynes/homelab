@@ -52,7 +52,7 @@ terraform state rm helm_release.argocd
 
 This removes ArgoCD from Terraform's state without deleting it from the cluster so that ArgoCD now fully manages itself.
 
-Don't re-run `bootstrap.sh` after the handoff — the Helm release still exists in the cluster but is no longer in Terraform's state, so the apply would fail. The script detects this and exits early with an explanation.
+Don't re-run `bootstrap.sh` after the handoff - the Helm release still exists in the cluster but is no longer in Terraform's state, so the apply would fail. The script detects this and exits early with an explanation.
 
 ## Accessing ArgoCD
 
@@ -66,7 +66,7 @@ Then browse to `http://localhost:8080` (plain HTTP — the server runs in insecu
 
 ## Teardown
 
-For full cluster teardown, re-import ArgoCD to state first (it was removed during the handoff), then destroy:
+For full cluster teardown, re-import ArgoCD to state first (as it was removed during the handoff), then destroy:
 
 ```bash
 cd terraform
