@@ -18,15 +18,11 @@ spec:
     namespace: argocd
   syncPolicy:
     automated:
-      # Specifies if resources should be pruned during auto-syncing ( false by
-      # default ).
-      prune: false
-      # Specifies if partial app sync should be executed when resources are
-      # changed only in target Kubernetes cluster and no git change detected
-      # ( false by default ). When testing a branch (target_revision != HEAD),
-      # selfHeal is disabled so that test_local.sh can patch child Applications
-      # to sync from the branch without the root app reverting them.
+      # ArgoCD removes these default fields from the live spec, which would show
+      # as drift to Terraform
+      # prune: false
+      # allowEmpty: false
+      # When testing a branch (target_revision != HEAD), selfHeal is disabled
+      # so that test_local.sh can patch child applications to sync from the
+      # branch without the root app reverting them
       selfHeal: ${self_heal}
-      # Allows deleting all application resources during automatic syncing
-      # ( false by default ).
-      allowEmpty: false

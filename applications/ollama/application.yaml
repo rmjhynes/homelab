@@ -20,6 +20,8 @@ spec:
     automated:
       prune: true
       selfHeal: true
-      allowEmpty: false
+      # ArgoCD removes this default field from the live spec, leaving the root
+      # app permanently OutOfSync if set here (false is already the default)
+      # allowEmpty: false
     syncOptions:
       - CreateNamespace=true
