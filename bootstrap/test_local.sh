@@ -7,6 +7,10 @@ source "${SCRIPT_DIR}/common.sh"
 
 CLUSTER_NAME="homelab-test"
 KUBECONFIG_PATH="/tmp/${CLUSTER_NAME}-kubeconfig"
+# This is only set in the context of the script
+# Need to set this manually witch 'kubectl --kubeconfig ${KUBECONFIG_PATH}'
+# when the script finishes (see show_access_info() output)
+export KUBECONFIG="${KUBECONFIG_PATH}"
 
 # Applications reference this repo both with and without the .git suffix, so
 # comparisons against it strip the suffix first
@@ -79,7 +83,6 @@ create_cluster() {
     --kubeconfig-switch-context=false
 
   k3d kubeconfig get "${CLUSTER_NAME}" > "${KUBECONFIG_PATH}"
-  export KUBECONFIG="${KUBECONFIG_PATH}"
 
   log_info "Waiting for cluster to be ready..."
   kubectl wait --for=condition=Ready nodes --all --timeout=120s
@@ -102,8 +105,6 @@ patch_child_apps() {
   if [ "${TARGET_REVISION}" = "HEAD" ]; then
     return
   fi
-
-  export KUBECONFIG="${KUBECONFIG_PATH}"
 
   log_info "Waiting for the root application to create child applications..."
   local apps=""
@@ -160,8 +161,6 @@ patch_child_apps() {
 }
 
 show_access_info() {
-  export KUBECONFIG="${KUBECONFIG_PATH}"
-
   local password
   password=$(get_argocd_password)
 
@@ -190,7 +189,6 @@ cmd_status() {
     exit 0
   fi
 
-  export KUBECONFIG="${KUBECONFIG_PATH}"
   echo ""
   log_info "Cluster status:"
   k3d cluster list | awk -v name="${CLUSTER_NAME}" 'NR==1 || $0 ~ name'
