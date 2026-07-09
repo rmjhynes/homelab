@@ -40,10 +40,13 @@ resolve_target_revision() {
   fi
 
   # ArgoCD pulls from GitHub, so it can only sync branches that exist there
-  if ! git ls-remote --exit-code origin "refs/heads/${TARGET_REVISION}" >/dev/null 2>&1; then
-    log_warn "Branch '${TARGET_REVISION}' not found on origin - push it or ArgoCD will fail to sync"
-    # --exit-code exits with status "2" when no matching refs are found in the
-    # remote repository.
+  local ls_remote_rc=0
+  git ls-remote --exit-code origin "refs/heads/${TARGET_REVISION}" >/dev/null 2>&1 || ls_remote_rc=$?
+  # --exit-code exits with status "2" when no matching refs are found in the
+  # remote repository.
+  if [ "${ls_remote_rc}" -eq 2 ]; then
+    log_error "Branch '${TARGET_REVISION}' not found on remote. ArgoCD will fail to sync unless its pushed - exiting..."
+    exit 1
   fi
 
   local unpushed_commits=$(git rev-list --count @{u}..HEAD)
@@ -76,12 +79,14 @@ create_cluster() {
     k3d cluster delete "${CLUSTER_NAME}"
   fi
 
-  # Keep the test cluster out of ~/.kube/config; the script and the user
-  # access it via the dedicated kubeconfig in /tmp instead
+  # Create the test cluster, keep it out of the default kubeconfig
+  # (isolated from the live cluster) and don't switch from live cluster context
+  # to test cluster context
   k3d cluster create "${CLUSTER_NAME}" --wait \
     --kubeconfig-update-default=false \
     --kubeconfig-switch-context=false
 
+  # Write test cluster kubeconfig to /tmp
   k3d kubeconfig get "${CLUSTER_NAME}" > "${KUBECONFIG_PATH}"
 
   log_info "Waiting for cluster to be ready..."
@@ -90,6 +95,7 @@ create_cluster() {
 }
 
 run_terraform() {
+  # Print branch in which we are pulling k8s manifests from
   log_info "Target revision: ${TARGET_REVISION}"
 
   run_terraform_staged \
@@ -98,46 +104,57 @@ run_terraform() {
 }
 
 # Child Applications in applications/ pin targetRevision: HEAD, which ArgoCD
-# resolves to main. Point their homelab repo sources at the branch under test
-# instead. The root app is deployed with selfHeal disabled when testing a
+# resolves to main.
+# This function patches those apps to point at the feature branch configurations.
+# The root app is deployed with selfHeal disabled when testing a
 # branch (see terraform/main.tf) so these patches are not reverted.
 patch_child_apps() {
+  # Child apps already pin to HEAD so there is nothing to patch
   if [ "${TARGET_REVISION}" = "HEAD" ]; then
     return
   fi
 
-  log_info "Waiting for the root application to create child applications..."
-  local apps=""
+  log_info "Waiting for the root application to sync and create child applications..."
+  # Wait for the root app's sync operation to finish.
+  # ArgoCD removes default values from manifests e.g. allowEmpty: false - this 
+  # causes status of "OutOfSync" indefinitely as it differs from git.
+  # We therefore want to wait for a status of "Succeeded" rather than "Synced".
+  local sync_phase=""
   local deadline=$((SECONDS + 180))
   while [ ${SECONDS} -lt ${deadline} ]; do
-    apps=$(kubectl get applications -n argocd -o name 2>/dev/null \
-      | grep -v "^application.argoproj.io/applications$" || true)
-    if [ -n "${apps}" ]; then
+    sync_phase=$(kubectl get application applications -n argocd \
+      -o jsonpath='{.status.operationState.phase}' 2>/dev/null || true)
+    if [ "${sync_phase}" = "Succeeded" ]; then
       break
     fi
     sleep 5
   done
 
-  if [ -z "${apps}" ]; then
-    log_warn "No child applications appeared after 180s - is branch '${TARGET_REVISION}' pushed to GitHub?"
-    log_warn "Skipping branch override"
+  if [ "${sync_phase}" != "Succeeded" ]; then
+    log_warn "Root application sync did not succeed after 180s (phase: ${sync_phase:-unknown}) - check its sync status and ArgoCD's connectivity to GitHub"
     return
   fi
 
-  # The root app's sync creates all children near-simultaneously; a short
-  # settle catches any stragglers from the same sync operation
-  sleep 5
+  # List all apps except the root app ("applications") which Terraform already
+  # deployed pointing at the branch under test.
+  # || true keeps set -e from killing the script if grep filters everything out.
+  local apps
   apps=$(kubectl get applications -n argocd -o name 2>/dev/null \
     | grep -v "^application.argoproj.io/applications$" || true)
 
+  # Iterate through each child app and patch to pull from feature branch
   log_info "Patching child applications to sync from '${TARGET_REVISION}'..."
   local app original patched
   for app in ${apps}; do
+    # Get child app configs as configured in main branch so they can be patched
+    # below
     original=$(kubectl get "${app}" -n argocd -o json)
 
-    # Retarget sources pointing at this repo's HEAD; leave pinned Helm chart
-    # versions and other repos untouched. Handles both single-source
-    # (.spec.source) and multi-source (.spec.sources) Applications
+    # Any child application manifest source revisions need to be changed from
+    # pointing to HEAD to pointing to the feature branch.
+    # Only the manifests with source repoURLs pointing to this homelab repo
+    # are patched.
+    # `patched` builds the new config to be passed to kubectl patch.
     patched=$(echo "${original}" | jq --arg repo "${REPO_URL}" --arg rev "${TARGET_REVISION}" '
       {spec: (.spec
         | if has("source") and (.source.repoURL | rtrimstr(".git")) == $repo
@@ -149,10 +166,15 @@ patch_child_apps() {
                 then .targetRevision = $rev else . end)
             else . end)}')
 
+    # If jq changed nothing above then don't bother patching below
     if [ "$(echo "${original}" | jq -c .spec)" = "$(echo "${patched}" | jq -c .spec)" ]; then
       continue
     fi
 
+    # --type merge used to overlay new spec onto child app object
+    # (CRDs don't support strategic patch)
+    # merge = declarative — "make these fields look like this" -> overlays it
+    # json = imperative — "perform these exact edit operations at these exact paths"
     kubectl patch "${app}" -n argocd --type merge -p "${patched}" >/dev/null
     log_info "  Patched ${app#application.argoproj.io/}"
   done
@@ -165,22 +187,22 @@ show_access_info() {
   password=$(get_argocd_password)
 
   echo ""
-  echo "========================================"
-  echo "  ArgoCD Access Info"
-  echo "========================================"
+  echo "======================================================================="
+  echo "                        ArgoCD Access Info"
+  echo "======================================================================="
   echo "  To use kubectl with this cluster, define an alias:"
   echo "  alias kt='kubectl --kubeconfig ${KUBECONFIG_PATH}'"
   echo ""
-  # ArgoCD runs in insecure (plain HTTP) mode once the self-managed app
-  # applies applications/argocd/values.yaml, so use the service's HTTP port
+  # ArgoCD runs in HTTP mode once the self-managed app applies 
+  # applications/argocd/values.yaml, so use the service's HTTP port
   echo "  Port forward: kt port-forward svc/argocd-server -n argocd 8080:80"
   echo "  URL:          http://localhost:8080"
   echo "  Username:     admin"
   echo "  Password:     ${password}"
   echo ""
   echo "  NOTE: The test cluster is NOT merged into ~/.kube/config, so plain"
-  echo "  kubectl still points at the live cluster."
-  echo "========================================"
+  echo "  kubectl still points at the live cluster. Use the alias above."
+  echo "======================================================================="
 }
 
 cmd_status() {

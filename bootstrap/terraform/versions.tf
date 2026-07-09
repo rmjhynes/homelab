@@ -12,9 +12,9 @@ terraform {
     }
   }
 
-  # State file path is supplied at init time via -backend-config="path=..."
-  # so bootstrap.sh and test_local.sh each keep
-  # their own state (see run_terraform_staged in common.sh)
+  # State file path is supplied at init time via -backend-config="path=..." so
+  # bootstrap.sh and test_local.sh each keep their own state
+  # (see run_terraform_staged in common.sh)
   backend "local" {}
 }
 
