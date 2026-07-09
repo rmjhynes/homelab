@@ -54,6 +54,38 @@ check_not_bootstrapped() {
   fi
 }
 
+# The root app's first sync creates the argocd app, which ArgoCD then syncs
+# automatically.
+# This function checks the argocd app is synced and healthy, before the argocd
+# helm chart can be removed from the Terraform state.
+wait_for_self_management() {
+  log_info "Waiting for the argocd Application to be created, synced and healthy..."
+
+  if kubectl -n argocd wait application/argocd --for=create --timeout=300s \
+    && kubectl -n argocd wait application/argocd \
+      --for=jsonpath='{.status.sync.status}'=Synced --timeout=300s \
+    && kubectl -n argocd wait application/argocd \
+      --for=jsonpath='{.status.health.status}'=Healthy --timeout=300s; then
+
+    log_info "ArgoCD is self-managing"
+  else
+    log_error "The argocd Application was not created or did not become Synced and Healthy"
+    log_error "ArgoCD is still in Terraform's state: fix the sync issue"
+    log_error "and re-run this script, or teardown with 'terraform destroy'"
+    exit 1
+  fi
+}
+
+# Remove the Helm release from Terraform state without deleting it from the
+# cluster, so ArgoCD fully manages itself.
+# Any earlier script exits keep helm_release.argocd still in the state so that
+# `terraform destroy` can still be used afor cluster teardown.
+handoff_to_argocd() {
+  log_info "Removing helm_release.argocd from Terraform state..."
+  terraform -chdir="${TERRAFORM_DIR}" state rm helm_release.argocd
+  log_info "Handoff complete: ArgoCD now fully manages itself"
+}
+
 show_access_info() {
   log_info "Getting ArgoCD admin password..."
   local password
@@ -98,6 +130,8 @@ case "${1:-}" in
     check_not_bootstrapped
     run_terraform_staged -var="kubeconfig_path=${KUBECONFIG_PATH}"
     wait_for_argocd
+    wait_for_self_management
+    handoff_to_argocd
     show_access_info
     ;;
   *)
