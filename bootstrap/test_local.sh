@@ -116,7 +116,7 @@ patch_child_apps() {
 
   log_info "Waiting for the root application to sync and create child applications..."
   # Wait for the root app's sync operation to finish.
-  # ArgoCD removes default values from manifests e.g. allowEmpty: false - this 
+  # ArgoCD removes default values from manifests e.g. allowEmpty: false - this
   # causes status of "OutOfSync" indefinitely as it differs from git.
   # We therefore want to wait for a status of "Succeeded" rather than "Synced".
   local sync_phase=""
@@ -193,7 +193,7 @@ show_access_info() {
   echo "  To use kubectl with this cluster, define an alias:"
   echo "  alias kt='kubectl --kubeconfig ${KUBECONFIG_PATH}'"
   echo ""
-  # ArgoCD runs in HTTP mode once the self-managed app applies 
+  # ArgoCD runs in HTTP mode once the self-managed app applies
   # applications/argocd/values.yaml, so use the service's HTTP port
   echo "  Port forward: kt port-forward svc/argocd-server -n argocd 8080:80"
   echo "  URL:          http://localhost:8080"

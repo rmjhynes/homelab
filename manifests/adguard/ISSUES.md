@@ -41,7 +41,7 @@ Verify with:
 firewall-cmd --get-active-zones
 ```
 
-> [!NOTE]  
+> [!NOTE]
 > This may need to be re-applied after network changes (WiFi reconnection, etc.).
 
 ## Verification

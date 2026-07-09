@@ -20,7 +20,7 @@ nmcli con mod "<wifi-name>" ipv4.ignore-auto-dns yes
 nmcli con down "<wifi-name>" && nmcli con up "<wifi-name>"
 ```
 
-> [!NOTE]  
+> [!NOTE]
 > `8.8.8.8` is the fallback DNS in case the adguard deployment goes down and the internet cannot be accessed to redeploy (via Argocd)
 
 Verify with:
