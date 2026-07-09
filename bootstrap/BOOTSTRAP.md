@@ -41,18 +41,20 @@ The script handles this by running Terraform in three stages:
 2. Second apply: Install ArgoCD via Helm (which creates the CRDs)
 3. Third apply: Now that CRDs exist, Terraform can validate and apply the remaining resources
 
-## Step 2: Handoff to ArgoCD
+## Step 2: Handoff to ArgoCD (automated)
 
-After bootstrap, ArgoCD syncs and begins managing itself via [the argocd application manifest](../applications/argocd/application.yaml). The ArgoCD install now has two owners: Terraform's state and the self-managed argocd Application. To complete the handoff and let ArgoCD be the sole owner:
+After the staged apply, ArgoCD syncs and begins managing itself via [the argocd application manifest](../applications/argocd/application.yaml). At that point the install has two owners: Terraform's state and the self-managed argocd Application. To complete the handoff and make ArgoCD the sole owner, the script removes the Helm release from Terraform's state without deleting it from the cluster:
 
 ```bash
-cd terraform
 terraform state rm helm_release.argocd
 ```
 
-This removes ArgoCD from Terraform's state without deleting it from the cluster so that ArgoCD now fully manages itself.
+`bootstrap.sh` runs this itself, but only after verifying that the argocd Application is synced and healthy.
 
-Don't re-run `bootstrap.sh` after the handoff - the Helm release still exists in the cluster but is no longer in Terraform's state, so the apply would fail. The script detects this and exits early with an explanation.
+If the sync fails or times out, the script exits **before** the `terraform state rm`, leaving ArgoCD in Terraform's state. From there you can fix the issue and re-run `bootstrap.sh` or teardown with `terraform destroy`.
+
+> [!IMPORTANT]
+> Don't re-run `bootstrap.sh` after a successful handoff - the Helm release still exists in the cluster but is no longer in Terraform's state, so the apply would fail. The script detects this and exits early with an explanation.
 
 ## Accessing ArgoCD
 
