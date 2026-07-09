@@ -39,9 +39,10 @@ check_cluster() {
   log_info "Cluster is reachable"
 }
 
-# After the handoff to ArgoCD (terraform state rm helm_release.argocd), a
-# re-run would fail mid-apply with Helm's "cannot re-use a name that is still
-# in use" error. This function exits in case of a re-run.
+# A successful bootstrap ends with the handoff to ArgoCD (terraform state rm
+# helm_release.argocd), so a re-run would fail mid-apply with Terraform "cannot
+# re-use a name that is still in use" error. This function exits in case of a
+# re-run.
 check_not_bootstrapped() {
   if kubectl -n argocd get deployment argocd-server >/dev/null 2>&1 \
     && ! terraform -chdir="${TERRAFORM_DIR}" state list 2>/dev/null \
@@ -92,9 +93,9 @@ show_access_info() {
   password=$(get_argocd_password)
 
   echo ""
-  echo "========================================"
+  echo "======================================================================="
   echo "  ArgoCD Access Info"
-  echo "========================================"
+  echo "======================================================================="
   echo "  URL:          https://argocd.homelab"
   echo "  Username:     admin"
   echo "  Password:     ${password}"
@@ -103,9 +104,9 @@ show_access_info() {
   echo "  first sync) and Pi-hole DNS for *.homelab. Until then:"
   echo "  kubectl port-forward svc/argocd-server -n argocd 8080:80"
   echo "  then browse to http://localhost:8080"
-  echo "========================================"
+  echo "======================================================================="
   echo ""
-  log_info "Bootstrap complete. ArgoCD will now sync applications from git."
+  log_info "Bootstrap and handoff complete. ArgoCD manages itself and syncs applications from git."
 }
 
 # If unknown argument is passed at script runtime, print out how the script can
