@@ -41,21 +41,39 @@ The script handles this by running Terraform in three stages:
 2. Second apply: Install ArgoCD via Helm (which creates the CRDs)
 3. Third apply: Now that CRDs exist, Terraform can validate and apply the remaining resources
 
-## Step 2: Handoff to ArgoCD
+## Step 2: Handoff to ArgoCD (automated)
 
-After bootstrap, ArgoCD syncs and begins managing itself via [the argocd application manifest](../applications/argocd/application.yaml), there are duplicate ArgoCD resources (Terraform's install + ArgoCD's self-managed install). To complete the handoff and let ArgoCD be the sole owner:
+After the staged apply, ArgoCD syncs and begins managing itself via [the argocd application manifest](../applications/argocd/application.yaml). At that point the install has two owners: Terraform's state and the self-managed argocd Application. To complete the handoff and make ArgoCD the sole owner, the script removes the Helm release from Terraform's state without deleting it from the cluster:
 
 ```bash
-cd terraform
 terraform state rm helm_release.argocd
 ```
 
-This removes ArgoCD from Terraform's state without deleting it from the cluster so that ArgoCD now fully manages itself.
+`bootstrap.sh` runs this itself, but only after verifying that the argocd Application is synced and healthy.
+
+If the sync fails or times out, the script exits **before** the `terraform state rm`, leaving ArgoCD in Terraform's state. From there you can fix the issue and re-run `bootstrap.sh` or teardown with `terraform destroy`.
+
+> [!IMPORTANT]
+> Don't re-run `bootstrap.sh` after a successful handoff - the Helm release still exists in the cluster but is no longer in Terraform's state, so the apply would fail. The script detects this and exits early with an explanation.
+
+## Accessing ArgoCD
+
+The `https://argocd.homelab` URL printed by the script requires the argocd application's ingress (created on its first sync) and Pi-hole DNS resolving `*.homelab`. Until both are in place, port-forward instead:
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:80
+```
+
+Then browse to `http://localhost:8080` (plain HTTP — the server runs in insecure mode because Traefik terminates TLS at the ingress).
 
 ## Teardown
 
-For full cluster teardown (re-import ArgoCD to state first if needed):
+For full cluster teardown, re-import ArgoCD to state first (as it was removed during the handoff), then destroy:
 
 ```bash
-terraform destroy
+cd terraform
+terraform import -var="kubeconfig_path=$HOME/.kube/config" helm_release.argocd argocd/argocd
+terraform destroy -var="kubeconfig_path=$HOME/.kube/config"
 ```
+
+The `kubeconfig_path` variable has no default, so pass it explicitly (or answer the prompt) when running Terraform outside the bootstrap script.
