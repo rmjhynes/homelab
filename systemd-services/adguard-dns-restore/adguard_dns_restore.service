@@ -13,7 +13,7 @@ Type=oneshot
 # and won't be re-triggered by later dependency changes
 RemainAfterExit=yes
 # Without this, a hung script would block boot forever as
-oneshots have no time limit by default. 360s so the script's
+# oneshots have no time limit by default. 360s so the script's
 # own 300s limit is reached first and this only catches a genuine hang
 TimeoutStartSec=360
 
