@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# Installs adguard_dns_restore as a systemd service: symlinks the script and
-# unit file out of this repo, then enables the unit so it runs on every boot.
-# Idempotent - safe to re-run after moving the repo or editing the files.
-
 # Get the directory where this script lives, regardless of where it's called from
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -21,15 +17,16 @@ if ! command -v dig >/dev/null 2>&1; then
   exit 1
 fi
 
-chmod +x "${SCRIPT_DIR}/adguard_dns_restore.sh"
+echo "Installing AdGuard DNS restore script and systemd service..."
 
-# -f so re-running replaces stale symlinks (e.g. if the repo moved)
-ln -sf "${SCRIPT_DIR}/adguard_dns_restore.sh" /usr/local/bin/adguard_dns_restore.sh
-ln -sf "${SCRIPT_DIR}/adguard_dns_restore.service" /etc/systemd/system/adguard_dns_restore.service
+# Copy files and set permissions in one step with `install`
+install -m 0755 "${SCRIPT_DIR}/adguard_dns_restore.sh" /usr/local/bin/adguard_dns_restore.sh
+install -m 0644 "${SCRIPT_DIR}/adguard_dns_restore.service" /etc/systemd/system/adguard_dns_restore.service
 
 systemctl daemon-reload
 systemctl enable adguard_dns_restore.service
 
-echo "Installed and enabled - the service will run on the next boot."
-echo "To test it now:    sudo systemctl start adguard_dns_restore.service"
-echo "To check the DNS:  resolvectl status wlo1   # Current DNS Server should be 127.0.0.1"
+echo "Installed and enabled - the service will run on the next boot"
+echo "If DNS is currently stuck on the 8.8.8.8 fallback, run it now:"
+echo "  sudo systemctl start adguard_dns_restore.service"
+echo "Check DNS with:  resolvectl status wlo1   # Current DNS Server should be 127.0.0.1"

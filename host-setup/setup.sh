@@ -105,6 +105,7 @@ fi
 
 # 4. Call script to install and enable the adguard_dns_restore systemd service
 
+echo ""
 sudo "${SCRIPT_DIR}/../systemd-services/adguard-dns-restore/install.sh"
 
 # 5. Verify DNS and firewalld configured as expected
