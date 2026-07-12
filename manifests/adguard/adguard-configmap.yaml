@@ -30,7 +30,13 @@ data:
       ratelimit_whitelist: []
       refuse_any: true
       upstream_dns:
-        - 8.8.8.8
+        # DoH (DNS over HTTPS) from two independent providers so
+        # one provider outage can't take down all DNS
+        # Quad9's DoH endpoint kept dropping new connections from my
+        # network which made all DNS resolution flaky and pushed 
+        # systemd-resolved onto its fallback, so this was removed
+        - https://8.8.8.8/dns-query
+        - https://1.1.1.1/dns-query
       upstream_dns_file: ""
       bootstrap_dns:
         - 9.9.9.10
