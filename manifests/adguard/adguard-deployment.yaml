@@ -19,8 +19,6 @@ spec:
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
-      nodeSelector:
-        kubernetes.io/hostname: homelab
       initContainers:
         - name: copy-config
           image: busybox
