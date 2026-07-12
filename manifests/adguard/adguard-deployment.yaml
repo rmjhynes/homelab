@@ -19,12 +19,15 @@ spec:
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
-      nodeSelector:
-        kubernetes.io/hostname: homelab
       initContainers:
         - name: copy-config
           image: busybox
-          command: ['sh', '-c', 'cp /config-template/AdGuardHome.yaml /opt/adguardhome/conf/AdGuardHome.yaml']
+          command:
+            - sh
+            - -c
+            - >-
+              cp /config-template/AdGuardHome.yaml
+              /opt/adguardhome/conf/AdGuardHome.yaml
           volumeMounts:
             - name: config-template
               mountPath: /config-template
@@ -32,7 +35,9 @@ spec:
               mountPath: /opt/adguardhome/conf
       containers:
         - name: adguard
-          image: adguard/adguardhome
+          # Pinned tag so imagePullPolicy defaults to IfNotPresent - the pod can
+          # start from the cached image after a reboot without internet access
+          image: adguard/adguardhome:v0.107.77
           volumeMounts:
             - mountPath: /opt/adguardhome/work
               name: work
