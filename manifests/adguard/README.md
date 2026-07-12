@@ -12,15 +12,10 @@ Access `http://<machine-ip>:3000`:
 
 ### 2. Configure Local Machine DNS
 
-> [!NOTE]
-> This step (and the rest of the host-level config) is automated by [`host-setup/setup.sh`](../../host-setup/setup.sh) - prefer running that.
-
-Configure NetworkManager to use AdGuard and ignore DHCP-provided DNS:
+Run [`host-setup/setup.sh`](../../host-setup/setup.sh) - it points NetworkManager at AdGuard (`127.0.0.1`) with `8.8.8.8` as fallback, and applies the rest of the host-level config (firewalld rules, the DNS restore service). See the [host setup README](../../host-setup/README.md) for details.
 
 ```bash
-nmcli con mod "<wifi-name>" ipv4.dns "127.0.0.1 8.8.8.8"
-nmcli con mod "<wifi-name>" ipv4.ignore-auto-dns yes
-nmcli con down "<wifi-name>" && nmcli con up "<wifi-name>"
+sudo ./host-setup/setup.sh
 ```
 
 > [!NOTE]
@@ -41,11 +36,16 @@ Current DNS Server: 127.0.0.1
 ### 3. Verify DNS
 
 ```bash
-dig @192.168.1.21 google.com
+dig @127.0.0.1 google.com      # external name via AdGuard's upstreams
+dig @127.0.0.1 adguard.homelab # local name via AdGuard's DNS rewrites
 ```
 
+`@127.0.0.1` targets AdGuard's listener directly (it only binds `127.0.0.1:53`,
+so the machine's LAN IP won't answer) and bypasses systemd-resolved, so success
+proves AdGuard itself is resolving.
+
 ### 4. Access AdGuard UI
-Navigate to `adguard.homelab`
+Navigate to `http://adguard.homelab`
 
 ## Architecture
 
