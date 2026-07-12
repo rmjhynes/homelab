@@ -6,8 +6,10 @@ set -o pipefail
 DEADLINE=300
 
 # Poll until adguard answers DNS queries on 127.0.0.1.
-# Querying port 53 directly is a stronger signal than checking the pod status
-# as it proves AdGuard is actually serving.
+# Without @, dig would ask whatever /etc/resolv.conf points at - systemd-
+# resolved (127.0.0.53), which can answer from its 8.8.8.8 fallback and prove
+# nothing about AdGuard. @127.0.0.1 sends the query straight to AdGuard's
+# listener (port defaults to 53), so success means AdGuard itself is serving.
 # +time=2 +tries=1 = 2s timeout, single attempt so each loop
 # iteration doesn't hang whilst AdGuard isn't up
 until dig +time=2 +tries=1 @127.0.0.1 google.com > /dev/null
