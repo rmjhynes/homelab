@@ -11,7 +11,9 @@ Everything in this repo that runs *on the cluster* is managed by ArgoCD, but a f
 3. Configures the following in `firewalld` as per [k3s docs](https://docs.k3s.io/installation/requirements?_highlight=firewalld&os=rhel#firewalld-1):
     - Adds k8s CNI interfaces (`cni0`, `flannel.1`) and pod/service CIDR sources (`10.42.0.0/16`, `10.43.0.0/16`) to the trusted zone to allow inter pod networking
     - Allows `6443/tcp` for the apiserver
-4. Installs and enables the `adguard_dns_restore.service` systemd service which calls the `adguard_dns_restore.sh` script to restart `systemd-resolved`, to point DNS back to using adguard
+4. Installs and enables:
+    - The `adguard_dns_restore.service` systemd service which restarts `systemd-resolved` to point DNS back to using adguard when its up
+    - The `adguard_dns_check.timer` which re-checks every 2 minutes and restores AdGuard as primary DNS if `systemd-resolved` has fallen back to `8.8.8.8`
 
 ### Machine that has already been setup and is in use
 
@@ -20,7 +22,9 @@ Everything in this repo that runs *on the cluster* is managed by ArgoCD, but a f
 3. Checks the following is configured in `firewalld`:
     - k8s CNI interfaces (`cni0`, `flannel.1`) and pod/service CIDR sources (`10.42.0.0/16`, `10.43.0.0/16`) are in the trusted zone to allow inter pod networking
     - `6443/tcp` (apiserver) is allowed
-4. Installs and enables the `adguard_dns_restore.service` systemd service which calls the `adguard_dns_restore.sh` script to restart `systemd-resolved`, to point DNS back to using adguard
+4. Installs and enables:
+    - The `adguard_dns_restore.service` systemd service which restarts `systemd-resolved` to point DNS back to using adguard when its up
+    - The `adguard_dns_check.timer` which re-checks every 2 minutes and restores AdGuard as primary DNS if `systemd-resolved` has fallen back to `8.8.8.8`
 
 ## Usage
 
