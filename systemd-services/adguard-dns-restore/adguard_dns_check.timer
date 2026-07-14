@@ -1,0 +1,13 @@
+[Unit]
+Description=Periodic check that systemd-resolved is using AdGuard
+
+[Timer]
+# Without this the first run would never happen - OnUnitActiveSec only counts
+# from the service's last activation, which never happens on a fresh boot
+OnBootSec=2min
+# Re-run 2 minutes after each run - caps the time stuck on the fallback at 2min
+OnUnitActiveSec=2min
+
+[Install]
+# Without this, `systemctl enable` fails and nothing starts the timer at boot
+WantedBy=timers.target
