@@ -53,6 +53,10 @@ AdGuard runs as a bare Pod with `hostNetwork: true`, binding directly to the hos
 
 The admin UI binds to `0.0.0.0:3001` (all interfaces) rather than `127.0.0.1:3001`. This is necessary because the Kubernetes Service routes traffic to the node's actual IP, not `127.0.0.1`. If the UI only listened on localhost, the Service couldn't reach it and the `adguard.homelab` ingress wouldn't work. DNS remains on `127.0.0.1:53` since it's accessed directly via the host network, not through a Service.
 
+### Design trade-off: DNS inside the cluster
+
+The point of this homelab is to work with Kubernetes, so AdGuard runs in the cluster like everything else. Any latency or downtime related to adguard will cause a DNS fallback to `8.8.8.8`. I've accepted this as a downside to this solution and will not be able to track every single DNS query via adguard if fallbacks happen.
+
 ### DNS Policy: `ClusterFirstWithHostNet`
 
 Normal pods get their own network namespace with a `/etc/resolv.conf` pointing to CoreDNS (the cluster DNS). This lets them resolve both:
