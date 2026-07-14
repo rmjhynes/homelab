@@ -1,0 +1,11 @@
+[Unit]
+Description=Restore AdGuard as primary DNS if systemd-resolved has fallen back to 8.8.8.8
+
+[Service]
+ExecStart=/usr/local/bin/adguard_dns_check.sh
+# Runs the check script to completion and then go back to inactive/dead so the
+# timer can start it again after 2 mins (not supposed to be long running daemon)
+Type=oneshot
+
+# No [Install] section: this unit is never enabled directly - 
+# adguard_dns_check.timer activates it every 2 minutes
