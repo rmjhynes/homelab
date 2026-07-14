@@ -31,7 +31,7 @@ systemctl enable adguard_dns_restore.service
 # Starts the timer immediately so the periodic check doesn't wait for a reboot
 systemctl enable --now adguard_dns_check.timer
 
-echo "Installed - the restore service runs at boot and the check timer every 2 minutes"
+echo "Installed - the restore service runs at boot and via the check timer every 2 minutes"
 echo "If DNS is currently stuck on the 8.8.8.8 fallback, the check timer will fix it within 2 minutes"
 echo "Or fix it immediately with:  sudo systemctl restart systemd-resolved"
 echo "Check DNS with:  resolvectl status wlo1   # Current DNS Server should be 127.0.0.1"
