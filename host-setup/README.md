@@ -42,10 +42,10 @@ sudo ./setup.sh "my-wifi-connection"
 
 Every step checks the current state first and skips if already configured, so the script is safe to re-run at any time. Situations where re-running makes sense:
 
-- after a machine rebuild / OS reinstall
-- after connecting to a different WiFi network (new connection profile means the DNS config needs applying again)
-- if firewalld rules have changed
-- when in doubt - a re-run on an already-configured machine changes nothing
+- After a machine rebuild / OS reinstall
+- After connecting to a different WiFi network (new connection profile means the DNS config needs applying again)
+- If firewalld rules have changed
+- When in doubt - a re-run on an already-configured machine changes nothing
 
 > [!NOTE]
 > The NetworkManager change uses `nmcli device reapply` rather than bouncing the connection, so it is safe to run over SSH.
