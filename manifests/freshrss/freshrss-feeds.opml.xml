@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml xmlns:frss="https://freshrss.org/opml" version="2.0">
+  <head>
+    <title>FreshRSS</title>
+    <dateCreated>Sat, 31 Oct 2026 19:54:05 +0000</dateCreated>
+  </head>
+  <body>
+    <outline text="Uncategorized">
+      <outline text="AWS News Blog" type="rss" xmlUrl="https://feeds.feedburner.com/AmazonWebServicesBlog" htmlUrl="https://aws.amazon.com/blogs/aws/" description="Announcements, Updates, and Launches"/>
+      <outline text="FreshRSS releases" type="rss" xmlUrl="https://github.com/FreshRSS/FreshRSS/releases.atom" htmlUrl="https://github.com/FreshRSS/FreshRSS/" description="FreshRSS releases @ GitHub"/>
+      <outline text="Hacker News: Show HN" type="rss" xmlUrl="https://hackernewsrss.com/show.xml" htmlUrl="https://hackernewsrss.com/" description="Every Show HN post, one post per day, sorted by points."/>
+    </outline>
+  </body>
+</opml>
