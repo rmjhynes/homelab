@@ -2,7 +2,7 @@
 
 In a declarative setup, ArgoCD should pull its own changes in from the Helm repo and update itself.
 
-The App of apps pattern is used to define an app that points to this git repository to deploy _sub_ apps that point to Helm chart repositories (like kube-prometheus stack) to pull down and deploy the respective resources associated with the application.
+The App of apps pattern is used to define an app that points to this git repository to deploy _sub_ apps that point to Helm chart repositories (like kube-prometheus-stack) to pull down and deploy the respective resources associated with the application.
 
 ## Bootstrap Workflow
 
