@@ -25,7 +25,7 @@ My homelab config.
 
 Access ArgoCD UI to check cluster applications sync status one of two ways:
 
-- Port forward to the service with `kubectl -n argocd port-forward svc/argocd-server 8080:80` and go to `http://localhost:8080` in a browser
+- Port forward to the service with `kubectl -n argocd port-forward svc/argocd-server 8080:80` and go to `http://localhost:8080` in a browser.
 - Go to `http://argocd.homelab` in a browser.
 
 ArgoCD login details:
@@ -36,7 +36,7 @@ admin
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 ```
 
-Links to all other apps can be found on the homepage dashboard: `http://home.homelab`
+Links to all other apps can be found on the homepage dashboard: `http://home.homelab`.
 
 ## Background
 Having no experience managing a production grade Kubernetes platform, setting up a homelab is allowing me to get familiar with popular industry tools and experiment in a safe environment. I am using this as an opportunity to build something different to what I manage professionally so I can build new skills and become a more well-rounded engineer.
@@ -111,7 +111,7 @@ Fedora is my distro of choice for my homelab; it offers stability and ease of us
 Some things are configured on the host OS and can't be managed by ArgoCD:
 
 - **[ansible-homelab-setup](https://github.com/rmjhynes/ansible-homelab-setup)** - general homelab machine configuration.
-- **This repo:** cluster related host config - see [host-setup/README.md](host-setup/README.md).
+- **This repo:** cluster-related host config - see [host-setup/README.md](host-setup/README.md).
 
 ## Docs index
 

@@ -1,6 +1,6 @@
 # Host Setup
 
-Everything in this repo that runs *on the cluster* is managed by ArgoCD, but a few things live at the host-OS level of the homelab machine and can't be managed that way. `setup.sh` applies all of them in one go so nothing has to be remembered after a rebuild.
+Everything in this repo that runs *in the cluster* is managed by ArgoCD, but a few things live at the host-OS level of the homelab machine and can't be managed that way. [`setup.sh`](setup.sh) applies all of them in one go so nothing has to be remembered after a rebuild.
 
 ## Workflow
 
