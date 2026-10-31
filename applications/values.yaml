@@ -1,0 +1,5 @@
+---
+# Git revision every child Application syncs this repo from. HEAD resolves to
+# main on the live cluster; test_local.sh overrides it with the branch under
+# test so syncs can't revert child apps back to main mid-test.
+targetRevision: HEAD

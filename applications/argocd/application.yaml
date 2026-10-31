@@ -13,7 +13,7 @@ spec:
       helm:
         valueFiles: [$values/applications/argocd/values.yaml]
     - repoURL: https://github.com/rmjhynes/homelab
-      targetRevision: HEAD
+      targetRevision: "{{ .Values.targetRevision }}"
       ref: values
   destination:
     # Resources applied to default k3s cluster

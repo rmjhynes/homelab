@@ -8,7 +8,7 @@ spec:
   project: homelab
   source:
     repoURL: https://github.com/rmjhynes/homelab.git
-    targetRevision: HEAD
+    targetRevision: "{{ .Values.targetRevision }}"
     path: manifests/ollama
     directory:
       recurse: true

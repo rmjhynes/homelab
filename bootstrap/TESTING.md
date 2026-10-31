@@ -20,12 +20,17 @@ Test runs never touch the Terraform state in `terraform/` (which may hold the li
 
 ## Branch Testing
 
-The script automatically detects the current git branch and configures ArgoCD to sync from that branch. This allows testing feature branch changes before merging to main. Two things happen when the current branch is not `main`:
+The script automatically detects the current git branch and configures ArgoCD to sync from that branch. This allows testing feature branch changes before merging to main.
 
-1. Terraform sets the root Application's `targetRevision` to the branch, so the Application definitions in `applications/` are read from the branch.
-2. After ArgoCD syncs, the script patches every child Application source that points at this repo with `targetRevision: HEAD` (which ArgoCD would otherwise resolve to `main`) to sync from the branch instead. Pinned Helm chart versions and external repos are left untouched, so changes to `manifests/` and Helm values on the branch are actually deployed.
+`applications/` is a small Helm chart: every child `application.yaml` sets the revision of its source(s) pointing at this repo to `{{ .Values.targetRevision }}` (default `HEAD`, which ArgoCD resolves to `main`). Terraform passes the branch as the `targetRevision` Helm parameter on the root Application, so:
 
-To keep these patches from being reverted, the root Application is deployed with `selfHeal` disabled in test clusters (the live bootstrap keeps `selfHeal: true`).
+1. The Application definitions in `applications/` are read from the branch.
+2. Every child Application is rendered to sync `manifests/` and Helm values from the branch. Pinned Helm chart versions and external repos are left untouched.
+
+Because the branch is part of the rendered desired state (not a runtime patch), syncing the root or any child app, or pushing new commits, keeps everything on the branch.
+
+> [!NOTE]
+> When adding a new app, use `targetRevision: "{{ .Values.targetRevision }}"` for any source pointing at this repo, and name the file `application.yaml` so the root chart picks it up.
 
 > [!IMPORTANT]
 > The branch must be pushed to GitHub for ArgoCD to sync it. The script warns if the current branch does not exist on `origin`.
@@ -36,7 +41,6 @@ To keep these patches from being reverted, the root Application is deployed with
 - k3d
 - kubectl
 - Terraform
-- jq
 
 ## Usage
 
@@ -57,8 +61,7 @@ The script will:
 3. Create a k3d cluster named `homelab-test`
 4. Run Terraform to bootstrap ArgoCD in the container
 5. Wait for ArgoCD to be ready
-6. Patch child Applications to sync from the current branch
-7. Display access info (port-forward command, credentials)
+6. Display access info (port-forward command, credentials)
 
 ## Architecture
 

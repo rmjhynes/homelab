@@ -60,7 +60,7 @@ bootstrap.sh (once)                    every change after that
                                        └──────────────────────────────┘
 ```
 
-The **app of apps pattern**: the [root Application](bootstrap/applications.yaml) points at the `applications/` directory and recurses. Every `application.yaml` file in this directory is deployed in the cluster as an app.
+The **app of apps pattern**: the [root Application](bootstrap/applications.yaml.tftpl) points at the `applications/` directory, which is a small Helm chart. Every `*/application.yaml` file in this directory is rendered and deployed in the cluster as an app, with `{{ .Values.targetRevision }}` set to `HEAD` on the live cluster or the branch under test locally.
 
 **Lifecycle of a change:** edit YAML --> (optionally test on a local k3d cluster with [bootstrap/test_local.sh](bootstrap/TESTING.md)) --> merge to `main` --> ArgoCD auto-syncs within a few minutes and no `kubectl apply` needed for anything ArgoCD manages.
 

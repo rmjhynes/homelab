@@ -1,0 +1,6 @@
+---
+apiVersion: v2
+name: applications
+description: Root App of Apps - renders every */application.yaml
+type: application
+version: 0.1.0

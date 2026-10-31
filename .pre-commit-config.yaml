@@ -13,7 +13,8 @@ repos:
       - id: yamllint
         exclude: |
           (?x)^(
-            manifests/rclone/rclone-config-sealed-secret.yaml
+            manifests/rclone/rclone-config-sealed-secret.yaml|
+            applications/templates/.*
           )$
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.108.0

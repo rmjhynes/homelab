@@ -1,0 +1,8 @@
+{{- /*
+Keeps each app's definition next to its values/docs instead of moving them
+all under templates/
+*/ -}}
+{{- range $path, $_ := .Files.Glob "*/application.yaml" }}
+---
+{{ tpl ($.Files.Get $path) $ }}
+{{- end }}
