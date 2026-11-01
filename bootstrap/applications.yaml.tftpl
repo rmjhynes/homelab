@@ -10,8 +10,12 @@ spec:
     repoURL: https://github.com/rmjhynes/homelab.git
     targetRevision: ${target_revision}
     path: applications
-    directory:
-      recurse: true
+    # Child apps template their targetRevision from this value. Without it,
+    # child apps hardcode HEAD (main) and any sync reverts a branch under test.
+    helm:
+      parameters:
+        - name: targetRevision
+          value: "${target_revision}"
   destination:
     # Resources applied to default k3s cluster
     name: in-cluster
@@ -22,7 +26,4 @@ spec:
       # as drift to Terraform
       # prune: false
       # allowEmpty: false
-      # When testing a branch (target_revision != HEAD), selfHeal is disabled
-      # so that test_local.sh can patch child applications to sync from the
-      # branch without the root app reverting them
-      selfHeal: ${self_heal}
+      selfHeal: true

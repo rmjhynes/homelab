@@ -12,10 +12,6 @@ KUBECONFIG_PATH="/tmp/${CLUSTER_NAME}-kubeconfig"
 # when the script finishes (see show_access_info() output)
 export KUBECONFIG="${KUBECONFIG_PATH}"
 
-# Applications reference this repo both with and without the .git suffix, so
-# comparisons against it strip the suffix first
-REPO_URL="https://github.com/rmjhynes/homelab"
-
 # Keep all mutable Terraform artifacts (providers, state) in /tmp so test runs
 # never touch the live cluster's state in the repo terraform directory
 TF_STATE_PATH="/tmp/${CLUSTER_NAME}.tfstate"
@@ -103,85 +99,6 @@ run_terraform() {
     -var="target_revision=${TARGET_REVISION}"
 }
 
-# Child Applications in applications/ pin targetRevision: HEAD, which ArgoCD
-# resolves to main.
-# This function patches those apps to point at the feature branch configurations.
-# The root app is deployed with selfHeal disabled when testing a
-# branch (see terraform/main.tf) so these patches are not reverted.
-patch_child_apps() {
-  # Child apps already pin to HEAD so there is nothing to patch
-  if [ "${TARGET_REVISION}" = "HEAD" ]; then
-    return
-  fi
-
-  log_info "Waiting for the root application to sync and create child applications..."
-  # Wait for the root app's sync operation to finish.
-  # ArgoCD removes default values from manifests e.g. allowEmpty: false - this
-  # causes status of "OutOfSync" indefinitely as it differs from git.
-  # We therefore want to wait for a status of "Succeeded" rather than "Synced".
-  local sync_phase=""
-  local deadline=$((SECONDS + 180))
-  while [ ${SECONDS} -lt ${deadline} ]; do
-    sync_phase=$(kubectl get application applications -n argocd \
-      -o jsonpath='{.status.operationState.phase}' 2>/dev/null || true)
-    if [ "${sync_phase}" = "Succeeded" ]; then
-      break
-    fi
-    sleep 5
-  done
-
-  if [ "${sync_phase}" != "Succeeded" ]; then
-    log_warn "Root application sync did not succeed after 180s (phase: ${sync_phase:-unknown}) - check its sync status and ArgoCD's connectivity to GitHub"
-    return
-  fi
-
-  # List all apps except the root app ("applications") which Terraform already
-  # deployed pointing at the branch under test.
-  # || true keeps set -e from killing the script if grep filters everything out.
-  local apps
-  apps=$(kubectl get applications -n argocd -o name 2>/dev/null \
-    | grep -v "^application.argoproj.io/applications$" || true)
-
-  # Iterate through each child app and patch to pull from feature branch
-  log_info "Patching child applications to sync from '${TARGET_REVISION}'..."
-  local app original patched
-  for app in ${apps}; do
-    # Get child app configs as configured in main branch so they can be patched
-    # below
-    original=$(kubectl get "${app}" -n argocd -o json)
-
-    # Any child application manifest source revisions need to be changed from
-    # pointing to HEAD to pointing to the feature branch.
-    # Only the manifests with source repoURLs pointing to this homelab repo
-    # are patched.
-    # `patched` builds the new config to be passed to kubectl patch.
-    patched=$(echo "${original}" | jq --arg repo "${REPO_URL}" --arg rev "${TARGET_REVISION}" '
-      {spec: (.spec
-        | if has("source") and (.source.repoURL | rtrimstr(".git")) == $repo
-              and .source.targetRevision == "HEAD"
-            then .source.targetRevision = $rev else . end
-        | if has("sources")
-            then .sources |= map(
-              if (.repoURL | rtrimstr(".git")) == $repo and .targetRevision == "HEAD"
-                then .targetRevision = $rev else . end)
-            else . end)}')
-
-    # If jq changed nothing above then don't bother patching below
-    if [ "$(echo "${original}" | jq -c .spec)" = "$(echo "${patched}" | jq -c .spec)" ]; then
-      continue
-    fi
-
-    # --type merge used to overlay new spec onto child app object
-    # (CRDs don't support strategic patch)
-    # merge = declarative — "make these fields look like this" -> overlays it
-    # json = imperative — "perform these exact edit operations at these exact paths"
-    kubectl patch "${app}" -n argocd --type merge -p "${patched}" >/dev/null
-    log_info "  Patched ${app#application.argoproj.io/}"
-  done
-
-  log_info "Branch override complete"
-}
-
 show_access_info() {
   local password
   password=$(get_argocd_password)
@@ -223,13 +140,12 @@ cmd_status() {
 }
 
 cmd_up() {
-  check_dependencies docker k3d kubectl jq terraform
+  check_dependencies docker k3d kubectl terraform
   check_docker_running
   resolve_target_revision
   create_cluster
   run_terraform
   wait_for_argocd
-  patch_child_apps
   show_access_info
   log_info "Test environment ready. Run '$0 down' to cleanup."
 }
