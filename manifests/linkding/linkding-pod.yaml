@@ -9,6 +9,11 @@ spec:
   containers:
     - name: linkding
       image: sissbruecker/linkding:latest
+      env:
+        - name: LD_SUPERUSER_NAME
+          value: "rmjhynes"
+        - name: LD_SUPERUSER_PASSWORD
+          value: "password"
       volumeMounts:
         - mountPath: /etc/linkding/data
           name: database
