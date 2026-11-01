@@ -1,0 +1,27 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: linkding
+  namespace: argocd
+spec:
+  project: homelab
+  source:
+    repoURL: https://github.com/rmjhynes/homelab.git
+    targetRevision: HEAD
+    path: manifests/linkding
+    directory:
+      recurse: true
+  destination:
+    # Resources applied to default k3s cluster
+    name: in-cluster
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      # ArgoCD removes this default field from the live spec, leaving the root
+      # app permanently OutOfSync if set here (false is already the default)
+      # allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
